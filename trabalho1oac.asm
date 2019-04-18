@@ -54,7 +54,7 @@
 #
 #------------------------------------------------------------------------------------------------------------------------------------
 #        /*************  Instructions template  **********
-            _____________________________________________
+#            _____________________________________________
 #            | OP  | RS  |  RD  |  RT  |  SHAMT  |  FUNCT |
 #            |  6  |  5  |  5   |   5  |     5   |    6   |
 #        R:  | OP  | RS  |  RD  |  RT  |  SHAMT  |  FUNCT |
@@ -64,7 +64,8 @@
 
         .data
 fout:   .asciiz "testout.txt"      # filename for output
-buffer: .asciiz "The quick brown fox jumps over the lazy dog."
+buffer_data: .asciiz "DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
+buffer_text: .asciiz "DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
         .text
 
 
@@ -80,8 +81,8 @@ buffer: .asciiz "The quick brown fox jumps over the lazy dog."
   # Write to file just opened
   li   $v0, 15       # system call for write to file
   move $a0, $s6      # file descriptor 
-  la   $a1, buffer   # address of buffer from which to write
-  li   $a2, 44       # hardcoded buffer length
+  la   $a1, buffer_data   # address of buffer from which to write
+  li   $a2, 80       # hardcoded buffer length
   syscall            # write to file
   ###############################################################
   # Close the file 
