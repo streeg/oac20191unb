@@ -63,20 +63,27 @@
 #        */   
 
         .data
-fout:   .asciiz "testout.txt"      # filename for output
+fout:   .asciiz "testout.mif"      # filename for output
+fin:    .asciiz "testin.asm"
 buffer_data: .asciiz "DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
 buffer_text: .asciiz "DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
         .text
 
 
   ###############################################################
+  li    $v0, 13      # system call for open file
+  la    $a0, fin     # input file name
+  li    $a1, 0       # open for reading (flags are 0: read, 1: write)
+  li    $a2, 0       # mode is ignored
+  syscall            # open a file (file descriptor returned in $v0)
+  move  $s5, $v0     # save the file descriptor in $s5
   # Open (for writing) a file that does not exist
   li   $v0, 13       # system call for open file
   la   $a0, fout     # output file name
   li   $a1, 1        # Open for writing (flags are 0: read, 1: write)
   li   $a2, 0        # mode is ignored
   syscall            # open a file (file descriptor returned in $v0)
-  move $s6, $v0      # save the file descriptor 
+  move $s6, $v0      # save the file descriptor in $s6
   ###############################################################
   # Write to file just opened
   li   $v0, 15       # system call for write to file
