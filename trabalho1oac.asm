@@ -67,33 +67,34 @@ fout:   .asciiz "testout.mif"      # filename for output
 fin:    .asciiz "testin.asm"
 buffer_data: .asciiz "DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
 buffer_text: .asciiz "DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
+buffer:   .space  32
         .text
 
 
   ###############################################################
-  li    $v0, 13      # system call for open file
-  la    $a0, fin     # input file name
-  li    $a1, 0       # open for reading (flags are 0: read, 1: write)
-  li    $a2, 0       # mode is ignored
-  syscall            # open a file (file descriptor returned in $v0)
-  move  $s5, $v0     # save the file descriptor in $s5
-  # Open (for writing) a file that does not exist
-  li   $v0, 13       # system call for open file
-  la   $a0, fout     # output file name
-  li   $a1, 1        # Open for writing (flags are 0: read, 1: write)
-  li   $a2, 0        # mode is ignored
-  syscall            # open a file (file descriptor returned in $v0)
-  move $s6, $v0      # save the file descriptor in $s6
+  li    $v0, 13       # system call for open file
+  la    $a0, fin      # input file name
+  li    $a1, 0        # open for reading (flags are 0: read, 1: write)
+  li    $a2, 0        # mode is ignored
+  syscall             # open a file (file descriptor returned in $v0)
+  move  $s5, $v0      # save the file descriptor in $s5
   ###############################################################
-  # Write to file just opened
-  li   $v0, 15       # system call for write to file
-  move $a0, $s6      # file descriptor 
-  la   $a1, buffer_data   # address of buffer from which to write
-  li   $a2, 80       # hardcoded buffer length
-  syscall            # write to file
-  ###############################################################
-  # Close the file 
-  li   $v0, 16       # system call for close file
-  move $a0, $s6      # file descriptor to close
-  syscall            # close file
-  ###############################################################
+  addi $t0, $t0,10  # hardcoded eof
+
+loop:   
+  beq $t0, $0, loopend# if t0 > 0 read from file (how to do eof?)
+  jal readchar        # this code reads in a character from the file                
+  li $v0,11           # print the character to the console
+  move $a0,$t1
+  syscall
+  addi $t0,$t0,-1     # t0--
+  j loop
+
+readchar:   li $v0,14 # prepara para ler caracter do arquivo
+            move $a0,$s5  # aponta pro primeiro caracter 
+            la $a1,buffer # salva em buffer?
+            li $a2,1      # le um caracter
+            syscall
+            lb $t1,buffer #armazena um byte em buffer?
+            jr $ra
+loopend:
