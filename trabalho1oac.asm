@@ -63,7 +63,75 @@ fin:    .asciiz "testin.asm"
 buffer_data: .asciiz "DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
 buffer_text: .asciiz "DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
 s_undefined:    .asciiz "instrução não definida"
+#
+s_zero: .asciiz 00000
+s_at:   .asciiz 00001
+s_v0:   .asciiz 00010
+s_v1:   .asciiz 00011 
+s_a0:   .asciiz 00100
+s_a1:   .asciiz 00101
+s_a2:   .asciiz 00110
+s_a3:   .asciiz 00111
+s_t0:   .asciiz 01000
+s_t1:   .asciiz 01001
+s_t2:   .asciiz 01010
+s_t3:   .asciiz 01101
+s_t4:   .asciiz 01100
+s_t5:   .asciiz 01011
+s_t6:   .asciiz 01110
+s_t7:   .asciiz 01111
+s_s0:   .asciiz 10000
+s_s1:   .asciiz 10001
+s_s2:   .asciiz 10010
+s_s3:   .asciiz 10011
+s_s4:   .asciiz 10100
+s_s5:   .asciiz 10101
+s_s6:   .asciiz 10110
+s_s7:   .asciiz 10111
+s_t8:   .asciiz 11000
+s_t9:   .asciiz 11001
+s_k0:   .asciiz 11010
+s_k1:   .asciiz 11011
+s_gp:   .asciiz 11100
+s_sp:   .asciiz 11101
+s_fp:   .asciiz 11110
+s_ra:   .asciiz 11111
+s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav: .asciiz 000000
+s_opcode_lw: .asciiz 100011
+s_opcode_sw: .asciiz 101011
+s_opcode_j:  .asciiz 000010
+s_opcode_jal:  .asciiz 000011
+s_opcode_bne:  .asciiz 000100
+s_opcode_bne:  .asciiz 000101
+s_opcode_lui:  .asciiz 001111
+s_opcode_addi: .asciiz 001000
+s_opcode_andi: .asciiz 001100
+s_opcode_ori:   .asciiz 001101
+s_opcode_xori:  .asciiz 001110
+s_opcode_bgez:  .asciiz 000001
+s_shamt: .asciiz 000000
+s_function_add: .asciiz 100000
+s_function_sub: .asciiz 100010
+s_function_and:  .asciiz 100100
+s_function_or:  .asciiz 100101
+s_function_nor:  .asciiz 100111
+s_function_xor:  .asciiz 100110 
+s_function_jr:  .asciiz 001000
+s_function_slt:  .asciiz 101010
+s_function_addu:  .asciiz 100001
+s_function_subu:  .asciiz 100011
+s_function_sll:  .asciiz 000000
+s_function_srl:  .asciiz  000010
+s_function_mult:  .asciiz 011000
+s_function_div:  .asciiz 011010
+s_function_mfhi:  .asciiz 010000
+s_function_mflo:  .asciiz 010010
+s_function_srav:  .asciiz 000111
+#instruções tipo i e j não tem function
+#
+s_converter:  .space 32
 buffer:   .space  4
+
         .text
 
 
@@ -144,7 +212,45 @@ main:
       bne $v0, 32, undefined #montar instrução na memória add $t1 $t2 $t3: opcode = 000000 (0) | t2: rs , t3: rt, t1: rd | shamt: 00000 | funct: 100000 (20) == 014b4820...?
       j main
 #########################################################################
+# Concatenate string
+# Ideia: concatenar as strings respectivas dos tipos R em seus campos. Converter string para hexa usando shift de bits. Escrever for para dar update no endereço de 4 em 4 em hexa. Em seguida adicionar código convertido de string pra hexa ao lado.
+# Copy first string to result buffer
+#la $a0, str1
+#la $a1, result
+#jal strcopier
+#nop
 
+# Concatenate second string on result buffer
+#la $a0, str2
+#or $a1, $v0, $zero
+#jal strcopier
+#nop
+#j finish
+#nop
+
+# String copier function
+#strcopier:
+#or $t0, $a0, $zero # Source
+#or $t1, $a1, $zero # Destination
+
+#loop:
+#lb $t2, 0($t0)
+#beq $t2, $zero, end
+#addiu $t0, $t0, 1
+#sb $t2, 0($t1)
+#addiu $t1, $t1, 1
+#b loop
+#nop
+
+#end:
+#or $v0, $t1, $zero # Return last position on result buffer
+#jr $ra
+#nop
+
+#finish:
+#j finish
+#nop
+#########################################################################
 readchar:   
   li $v0,14 # prepara para ler caracter do arquivo
   move $a0,$s5  # aponta pro ponteiro no arquivo
