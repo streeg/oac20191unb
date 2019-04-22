@@ -91,14 +91,15 @@ buffer:   .space  4
 ########################################################################
 main:
   jal readchar
-  beq $v0, 46, datatext
+  beq $v0, 46, parser
 ########################################################################
-  datatext:
+  parser:
     jal readchar
-    beq $v0, 100, data
-    beq $v0, 116, text
+    beq $v0, 100, i_data
+    beq $v0, 116, i_text
+    beq $v0, 97, i_add
 #########################################################################
-    data: 
+    i_data: 
       #check if .data
       jal readchar
       bne $v0, 97, undefined
@@ -116,7 +117,7 @@ main:
       syscall            # write to file
       j main
 #########################################################################
-    text: 
+    i_text: 
       #check if .text
       jal readchar
       bne $v0, 101, undefined
@@ -132,6 +133,15 @@ main:
       la   $a1, buffer_text # address of buffer from which to write
       li   $a2, 80       # hardcoded buffer length (size of buffer_data in decimal)
       syscall            # write to file
+      j main
+#########################################################################
+    i_add:
+      jal readchar
+      bne $v0, 97, undefined
+      jal readchar
+      bne $v0, 97, undefined
+      jal readchar
+      bne $v0, 32, undefined #montar instrução na memória add $t1 $t2 $t3: opcode = 000000 (0) | t2: rs , t3: rt, t1: rd | shamt: 00000 | funct: 100000 (20) == 014b4820...?
       j main
 #########################################################################
 
