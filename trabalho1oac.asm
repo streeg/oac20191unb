@@ -18,7 +18,7 @@
 #sendo um o arquivo  fonte  (.asm) e dois arquivos de saídas esperados  (.mif), para  fins de verificação e  testes 
 #durante o desenvolvimento. Observem o modo de endereçamento, incluindo a informação do cabeçalho, sendo
 #responsabilidade dos desenvolvedores o tratamento dos endereços gerados (observando o padrão MIPS),
-#incluindo todos os ajustes	necessários.	
+#incluindo todos os ajustes necessários.  
 #
 #------------------------------------------------------------------------------------------------------------------------------------ 
 #
@@ -47,10 +47,10 @@
 #------------------------------------------------------------------------------------------------------------------------------------ 
 #
 #label: 
-#	instrução $registrador, #registrador, #registrador 	#comentário
-#tab 	instr espaço regi espaço regi espaço regi tab 	#coment
+# instrução $registrador, #registrador, #registrador  #comentário
+#tab  instr espaço regi espaço regi espaço regi tab   #coment
 #coca:
-#	add $t0, $t0, $zero		#adiciona zero em $t0
+# add $t0, $t0, $zero   #adiciona zero em $t0
 #
 #------------------------------------------------------------------------------------------------------------------------------------
 #        /*************  Instructions template  **********
@@ -67,34 +67,36 @@ fout:   .asciiz "testout.mif"      # filename for output
 fin:    .asciiz "testin.asm"
 buffer_data: .asciiz "DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
 buffer_text: .asciiz "DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
-buffer:   .space  32
+buffer:   .space  4
         .text
 
-
-  ###############################################################
+######################################################################### 
   li    $v0, 13       # system call for open file
   la    $a0, fin      # input file name
   li    $a1, 0        # open for reading (flags are 0: read, 1: write)
   li    $a2, 0        # mode is ignored
   syscall             # open a file (file descriptor returned in $v0)
   move  $s5, $v0      # save the file descriptor in $s5
-  ###############################################################
-  addi $t0, $t0,10  # hardcoded eof
-
-loop:   
-  beq $t0, $0, loopend# if t0 > 0 read from file (how to do eof?)
-  jal readchar        # this code reads in a character from the file                
-  li $v0,11           # print the character to the console
-  move $a0,$t1
-  syscall
-  addi $t0,$t0,-1     # t0--
-  j loop
-
+######################################################################### 
 readchar:   li $v0,14 # prepara para ler caracter do arquivo
-            move $a0,$s5  # aponta pro primeiro caracter 
-            la $a1,buffer # salva em buffer?
+            move $a0,$s5  # aponta pro começo do arquivo
+            la $a1,buffer # salva em buffer? para armazenar mais tarde?
             li $a2,1      # le um caracter
             syscall
-            lb $t1,buffer #armazena um byte em buffer?
-            jr $ra
-loopend:
+            beq $v0, $0, loopend
+#########################################################################            
+            lb $t1,buffer # armazena um byte em buffer?
+            beq $t1, 32, quebrainstrucao #se t1 for um espaço vai pra quebra instrução
+            li $v0, 11    # prepara para escrever (printf)
+            move $a0, $t1 # escreve caracter no buffer
+            syscall         
+            j readchar
+loopend: 
+            li $v0, 1
+            add $a0, $zero, $t1
+            syscall
+            
+quebrainstrucao:
+      
+
+      
