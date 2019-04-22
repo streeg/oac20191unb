@@ -44,14 +44,6 @@
 # clo $t1, $t2
 # srav $t1, $t2, $t3
 #
-#------------------------------------------------------------------------------------------------------------------------------------ 
-#
-#label: 
-# instrução $registrador, #registrador, #registrador  #comentário
-#tab  instr espaço regi espaço regi espaço regi tab   #coment
-#coca:
-# add $t0, $t0, $zero   #adiciona zero em $t0
-#
 #------------------------------------------------------------------------------------------------------------------------------------
 #        /*************  Instructions template  **********
 #            _____________________________________________
@@ -61,42 +53,136 @@
 #        I:  | OP  | RS  |  RT  |        ADDRES / IMM     |
 #        J:  | OP  |           TARGET / ADDRESS           |
 #        */   
+#------------------------------------------------------------------------------------------------------------------------------------
+#
 
         .data
-fout:   .asciiz "testout.mif"      # filename for output
+fouttext:   .asciiz "testdataout.mif"      # filename for data output 
+foutdata:   .asciiz "testtextout.mif"      # filename for text output
 fin:    .asciiz "testin.asm"
 buffer_data: .asciiz "DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
 buffer_text: .asciiz "DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
+s_undefined:    .asciiz "instrução não definida"
 buffer:   .space  4
         .text
 
-######################################################################### 
+
+#########################################################################
   li    $v0, 13       # system call for open file
   la    $a0, fin      # input file name
   li    $a1, 0        # open for reading (flags are 0: read, 1: write)
   li    $a2, 0        # mode is ignored
   syscall             # open a file (file descriptor returned in $v0)
-  move  $s5, $v0      # save the file descriptor in $s5
-######################################################################### 
-readchar:   li $v0,14 # prepara para ler caracter do arquivo
-            move $a0,$s5  # aponta pro começo do arquivo
-            la $a1,buffer # salva em buffer? para armazenar mais tarde?
-            li $a2,1      # le um caracter
-            syscall
-            beq $v0, $0, loopend
-#########################################################################            
-            lb $t1,buffer # armazena um byte em buffer?
-            beq $t1, 32, quebrainstrucao #se t1 for um espaço vai pra quebra instrução
-            li $v0, 11    # prepara para escrever (printf)
-            move $a0, $t1 # escreve caracter no buffer
-            syscall         
-            j readchar
-loopend: 
-            li $v0, 1
-            add $a0, $zero, $t1
-            syscall
-            
-quebrainstrucao:
-      
+  move  $s5, $v0      # save the file descriptor for reading in $s5
+#########################################################################
+  li   $v0, 13       # system call for open file
+  la   $a0, foutdata # output file name
+  li   $a1, 1        # Open for writing (flags are 0: read, 1: write)
+  li   $a2, 0        # mode is ignored
+  syscall            # open a file (file descriptor returned in $v0)
+  move $s6, $v0      # save the file descriptor for writing data in $s6
+#########################################################################
+  li   $v0, 13       # system call for open file
+  la   $a0, fouttext # output file name
+  li   $a1, 1        # Open for writing (flags are 0: read, 1: write)
+  li   $a2, 0        # mode is ignored
+  syscall            # open a file (file descriptor returned in $v0)
+  move $s7, $v0      # save the file descriptor for writing text in $s6
+########################################################################
+main:
+  jal readchar
+  beq $v0, 46, datatext
+########################################################################
+  datatext:
+    jal readchar
+    beq $v0, 100, data
+    beq $v0, 116, text
+#########################################################################
+    data: 
+      #check if .data
+      jal readchar
+      bne $v0, 97, undefined
+      jal readchar
+      bne $v0, 116, undefined
+      jal readchar
+      bne $v0, 97, undefined
+      jal readchar
+      bne $v0, 10, undefined
+      #write data header
+      li   $v0, 15       # system call for write to file
+      move $a0, $s6      # file descriptor for text stored in s6
+      la   $a1, buffer_data # address of buffer from which to write
+      li   $a2, 81       # hardcoded buffer length (size of buffer_data in decimal)
+      syscall            # write to file
+      j main
+#########################################################################
+    text: 
+      #check if .text
+      jal readchar
+      bne $v0, 101, undefined
+      jal readchar
+      bne $v0, 120, undefined
+      jal readchar
+      bne $v0, 116, undefined
+      jal readchar
+      bne $v0, 10, undefined
+      #write text header
+      li   $v0, 15       # system call for write to file
+      move $a0, $s7      # file descriptor for text stored in s7
+      la   $a1, buffer_text # address of buffer from which to write
+      li   $a2, 80       # hardcoded buffer length (size of buffer_data in decimal)
+      syscall            # write to file
+      j main
+#########################################################################
 
-      
+readchar:   
+  li $v0,14 # prepara para ler caracter do arquivo
+  move $a0,$s5  # aponta pro ponteiro no arquivo
+  la $a1,buffer # salva em buffer 
+  li $a2,1        # le um caracter
+  syscall
+  beq $v0, $0, loopend
+  lb $v0,buffer # le um byte armazenado em buffer
+#########################################################################
+#  print:  
+#    li $v0, 11    # prepara para escrever (printf)
+#    move $a0, $t1 # escreve caracter no buffer
+#    syscall         
+#
+  jr $ra  
+#########################################################################
+loopend: 
+  li $v0, 1
+  add $a0, $zero, $t1
+  syscall
+#########################################################################
+close_file:
+  close_fin:
+    # Close the file 
+    li   $v0, 16       # system call for close file
+    move $a0, $s5      # file descriptor to close
+    syscall            # close file
+#########################################################################
+  close_data:
+    # Close the file 
+    li   $v0, 16       # system call for close file
+    move $a0, $s6      # file descriptor to close
+    syscall            # close file
+#########################################################################
+  close_text:
+    # Close the file 
+    li   $v0, 16       # system call for close file
+    move $a0, $s7      # file descriptor to close
+    syscall            # close file
+#########################################################################
+end:
+    #sai do programa
+    li    $v0, 10
+    syscall
+#########################################################################
+undefined:
+  li    $v0, 4      # syscall 4, imprime string
+  la    $a0, s_undefined  # le s_undefined
+  syscall
+  j end 
+#########################################################################
