@@ -60,8 +60,15 @@
 fouttext:   .asciiz "testdataout.mif"      # filename for data output 
 foutdata:   .asciiz "testtextout.mif"      # filename for text output
 fin:    .asciiz "testin.asm"
-buffer_data: .asciiz "DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
-buffer_text: .asciiz "DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
+buffer_data_init: .asciiz "DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
+buffer_text_init: .asciiz "DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
+buffer_data_end:  .asciiz "\nEND;"
+buffer_text_end:  .asciiz "\nEND;"
+buffer_data_address:  .space  8
+buffer_text_address:  .space  8
+s_divisor:  .asciiz " : "
+s_finalizador:  .asciiz ";"
+
 s_undefined:    .asciiz "instrução não definida"
 #
 s_zero: .asciiz 00000
@@ -75,9 +82,9 @@ s_a3:   .asciiz 00111
 s_t0:   .asciiz 01000
 s_t1:   .asciiz 01001
 s_t2:   .asciiz 01010
-s_t3:   .asciiz 01101
+s_t3:   .asciiz 01011
 s_t4:   .asciiz 01100
-s_t5:   .asciiz 01011
+s_t5:   .asciiz 01101
 s_t6:   .asciiz 01110
 s_t7:   .asciiz 01111
 s_s0:   .asciiz 10000
@@ -158,60 +165,210 @@ buffer:   .space  4
   move $s7, $v0      # save the file descriptor for writing text in $s6
 ########################################################################
 main:
-  jal readchar
-  beq $v0, 46, parser
+  jal readchar       #le primeiro caracter
+  bne $v0, 46, undefined #se o caracter não for um '.' vai para o switch de instrução
 ########################################################################
   parser:
-    jal readchar
-    beq $v0, 100, i_data
-    beq $v0, 116, i_text
-    beq $v0, 97, i_add
+    jal readchar    #le caracter
+    beq $v0, 10, parser   #se caracter for 'enter', continua caminhando no arquivo
+    beq $v0, 100, i_data  #se caracter for um 'd' vai pra função de escrita do .data 
+    beq $v0, 116, i_text  #se caracter for um 't' vai pra função de escrita do .text
+    beq $v0, 97, i_add    #se caracter for um 'a' vai pra função de escrita do add, addu e addi
 #########################################################################
     i_data: 
       #check if .data
-      jal readchar
-      bne $v0, 97, undefined
-      jal readchar
-      bne $v0, 116, undefined
-      jal readchar
-      bne $v0, 97, undefined
-      jal readchar
-      bne $v0, 10, undefined
+      jal readchar   #le caracter
+      bne $v0, 97, undefined  #se o proximo caracter não for 'a', instrução não definida.
+      jal readchar   #le caracter
+      bne $v0, 116, undefined #se o proximo caracter não for 't', instrução não definida.
+      jal readchar   #le caracter
+      bne $v0, 97, undefined  #se o proximo caracter não for 'a', instrução não definida.
+      jal readchar   #le caracter
+      bne $v0, 10, undefined  #se o proximo caracter não for 'enter', instrução não definida.
       #write data header
       li   $v0, 15       # system call for write to file
       move $a0, $s6      # file descriptor for text stored in s6
-      la   $a1, buffer_data # address of buffer from which to write
-      li   $a2, 81       # hardcoded buffer length (size of buffer_data in decimal)
+      la   $a1, buffer_data_init # address of buffer from which to write
+      li   $a2, 81       # hardcoded buffer length (size of buffer_data_init in decimal)
       syscall            # write to file
+
       j main
 #########################################################################
     i_text: 
       #check if .text
-      jal readchar
-      bne $v0, 101, undefined
-      jal readchar
-      bne $v0, 120, undefined
-      jal readchar
-      bne $v0, 116, undefined
-      jal readchar
-      bne $v0, 10, undefined
+      jal readchar   #le caracter
+      bne $v0, 101, undefined  #se o proximo caracter não for 'e', instrução não definida.
+      jal readchar   #le caracter
+      bne $v0, 120, undefined  #se o proximo caracter não for 'x', instrução não definida.
+      jal readchar   #le caracter
+      bne $v0, 116, undefined  #se o proximo caracter não for 't', instrução não definida.
+      jal readchar   #le caracter
+      bne $v0, 10, undefined  #se o proximo caracter não for 'enter', instrução não definida.
       #write text header
       li   $v0, 15       # system call for write to file
       move $a0, $s7      # file descriptor for text stored in s7
-      la   $a1, buffer_text # address of buffer from which to write
-      li   $a2, 80       # hardcoded buffer length (size of buffer_data in decimal)
+      la   $a1, buffer_text_init # address of buffer from which to write
+      li   $a2, 80       # hardcoded buffer length (size of buffer_data_init in decimal)
       syscall            # write to file
+      beq $v0, 10, parser #se o proximo caracter for 'enter', volta pra função leitura de caracter até achar próxima instrução.
       j main
 #########################################################################
     i_add:
-      jal readchar
-      bne $v0, 97, undefined
-      jal readchar
-      bne $v0, 97, undefined
-      jal readchar
-      bne $v0, 32, undefined #montar instrução na memória add $t1 $t2 $t3: opcode = 000000 (0) | t2: rs , t3: rt, t1: rd | shamt: 00000 | funct: 100000 (20) == 014b4820...?
-      j main
+      jal readchar  #le caracter
+      bne $v0, 97, undefined  #se o proximo caracter não for 'a', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 97, undefined  #se o proximo caracter não for 'a', instrução não definida.
+      jal readchar  #le caracter
+      beq $v0, 117, i_addu  #se o proximo caracter for 'u', funçao de escrita do addu 
+      beq $v0, 105, i_addi  #se o proximo caracter for 'i', funçao de escrita do addi
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.  
+    #i_montaregistrador:  
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      bne $v0, 10, undefined #se o proximo caracter não for um 'enter', instrução não definida  
+      jal pegaregistrador #tem que usar pilha zzz (jal aninhado de jal)
 #########################################################################
+    i_addu:
+      jal readchar #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
+      jal readchar #le caracter
+      bne $v0, 36, undefined #se o proximo caracter não for um '$', instrução não definida.  
+      j parser  #volta pra função leitura de caracter até achar próxima instrução.
+#########################################################################
+    i_addi:
+      jal readchar #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
+      jal readchar #le caracter
+      bne $v0, 36, undefined #se o proximo caracter não for um '$', instrução não definida.
+      jal readchar #le caracter
+      bne $v0, 10, undefined #se o proximo caracter não for um 'enter', instrução não definida  
+      j parser  #volta pra função leitura de caracter até achar próxima instrução.
+#########################################################################
+    pegaregistrador:
+      jal readchar  #le caracter
+      beq $v0, 116, i_registradort  #se caracter = t, funcao que monta registrador tipo t
+      beq $v0, 115, i_registradors_sp  #se caracter = s, funcao que monta registrador tipo s/sp
+      beq $v0, 97, i_registradora  #se caracter = a, funcao que monta registrador tipo a
+      beq $v0, 118, i_registradorv   #se caracter = v, funcao que monta registrador tipo v
+      beq $v0, 122, i_registradorzero  #se caracter = z, funcao que monta registrador tipo zero
+      beq $v0, 107, i_reigstradork   #se caracter = k, funcao que monta registrador tipo k
+      beq $v0, 103, i_registradorgp  #se caracter = g, funcao que monta registrador tipo gp
+      beq $v0, 102, i_registradorfp  #se caracter = fp, funcao que monta registrador tipo fp
+      beq $v0, 114, i_registradorra  #se caracter = ra, funcao que monta registrador tipo ra
+      j parser  #volta pra função leitura de caracter até achar próxima instrução.
+##########################################################################      
+    i_registradort:
+      jal readchar #le caracter
+      beq $v0, 48, i_tnumero0  #se t0, funcao que coloca string t0 no endereço s1
+      beq $v0, 49, i_tnumero1  #se t1, funcao que coloca string t1 no endereço s1
+      beq $v0, 50, i_tnumero2  #se t2, funcao que coloca string t2 no endereço s1
+      beq $v0, 51, i_tnumero3  #se t3, funcao que coloca string t3 no endereço s1
+      beq $v0, 52, i_tnumero4  #se t4, funcao que coloca string t4 no endereço s1
+      beq $v0, 53, i_tnumero5  #se t5, funcao que coloca string t5 no endereço s1
+      beq $v0, 54, i_tnumero6  #se t6, funcao que coloca string t6 no endereço s1
+      beq $v0, 55, i_tnumero7  #se t7, funcao que coloca string t7 no endereço s1
+      beq $v0, 56, i_tnumero8  #se t8, funcao que coloca string t8 no endereço s1
+      beq $v0, 57, i_tnumero9  #se t9, funcao que coloca string t9 no endereço s1
+      
+    i_tnumero0:
+      la $s1, s_t0  #coloca string t0 em s1
+      jr $ra
+    i_tnumero1:
+      la $s1, s_t1  #coloca string t1 em s1
+      jr $ra
+    i_tnumero2:
+      la $s1, s_t2  #coloca string t2 em s1
+      jr $ra
+    i_tnumero3:
+      la $s1, s_t3  #coloca string t3 em s1
+      jr $ra
+    i_tnumero4:
+      la $s1, s_t4  #coloca string t4 em s1
+      jr $ra
+    i_tnumero5:
+      la $s1, s_t5  #coloca string t5 em s1
+      jr $ra
+    i_tnumero6:
+      la $s1, s_t6  #coloca string t6 em s1
+      jr $ra
+    i_tnumero7:
+      la $s1, s_t7  #coloca string t7 em s1
+      jr $ra
+    i_tnumero8:
+      la $s1, s_t8  #coloca string t8 em s1
+      jr $ra
+    i_tnumero9:
+      la $s1, s_t9  #coloca string t9 em s1
+      jr $ra
+    
+    i_registradors_sp:
+      jal readchar #le caracter
+      beq $v0, 112, i_registradorsp
+      beq $v0, 48, i_snumero0  #se s0, funcao que coloca string s0 no endereço s1
+      beq $v0, 49, i_snumero1  #se s1, funcao que coloca string s1 no endereço s1
+      beq $v0, 50, i_snumero2  #se s2, funcao que coloca string s2 no endereço s1
+      beq $v0, 51, i_snumero3  #se s3, funcao que coloca string s3 no endereço s1
+      beq $v0, 52, i_snumero4  #se s4, funcao que coloca string s4 no endereço s1
+      beq $v0, 53, i_snumero5  #se s5, funcao que coloca string s5 no endereço s1
+      beq $v0, 54, i_snumero6  #se s6, funcao que coloca string s6 no endereço s1
+      beq $v0, 55, i_snumero7  #se s7, funcao que coloca string s7 no endereço s1
+    i_snumero0:
+      la $s1, s_s0  #coloca string s0 em s1
+      jr $ra 
+    i_snumero1:
+      la $s1, s_s1  #coloca string s1 em s1
+      jr $ra
+    i_snumero2:
+      la $s1, s_s2  #coloca string s2 em s1
+      jr $ra
+    i_snumero3:
+      la $s1, s_s3  #coloca string s3 em s1
+      jr $ra
+    i_snumero4:
+      la $s1, s_s4  #coloca string s4 em s1
+      jr $ra
+    i_snumero5:
+      la $s1, s_s5  #coloca string s5 em s1
+      jr $ra
+    i_snumero6:
+      la $s1, s_s6  #coloca string s6 em s1
+      jr $ra
+    i_snumero7:
+      la $s1, s_s7  #coloca string s7 em s1
+      jr $ra
+    i_registradorsp:
+      la $s1, s_sp #coloca string sp em s1
+      jr $ra
+
+    i_registradora:
+      jal readchar #le caracter
+      beq $v0, 48, i_anumero0  #se a0, funcao que coloca string a0 no endereço s1
+      beq $v0, 49, i_anumero1  #se a1, funcao que coloca string a1 no endereço s1
+      beq $v0, 50, i_anumero2  #se a2, funcao que coloca string a2 no endereço s1
+      beq $v0, 51, i_anumero3  #se a3, funcao que coloca string a3 no endereço s1
+
+    i_anumero0:
+      la $s1, s_a0  #coloca string a0 em s1
+      jr $ra 
+    i_anumero1:
+      la $s1, s_a1  #coloca string a1 em s1
+      jr $ra
+    i_anumero2:
+      la $s1, s_a2  #coloca string a2 em s1
+      jr $ra
+    i_anumero3:
+      la $s1, s_a3  #coloca string a3 em s1
+      jr $ra         
+
+    i_registradorv:
+    i_registradorzero:
+    i_registradork:
+    i_registradorgp:
+    i_registradorfp:
+    i_registradorra:
+
+#########################################################################    
 # Concatenate string
 # Ideia: concatenar as strings respectivas dos tipos R em seus campos. Converter string para hexa usando shift de bits. Escrever for para dar update no endereço de 4 em 4 em hexa. Em seguida adicionar código convertido de string pra hexa ao lado.
 # Copy first string to result buffer
@@ -257,20 +414,19 @@ readchar:
   la $a1,buffer # salva em buffer 
   li $a2,1        # le um caracter
   syscall
-  beq $v0, $0, loopend
+  beq $v0, $0, loopend  #se eof, fim leitura
   lb $v0,buffer # le um byte armazenado em buffer
 #########################################################################
 #  print:  
 #    li $v0, 11    # prepara para escrever (printf)
 #    move $a0, $t1 # escreve caracter no buffer
 #    syscall         
-#
+loopend: #fim leitura/print
+#  li $v0, 1 
+#  add $a0, $zero, $t1
+#  syscall
   jr $ra  
 #########################################################################
-loopend: 
-  li $v0, 1
-  add $a0, $zero, $t1
-  syscall
 #########################################################################
 close_file:
   close_fin:
