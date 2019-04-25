@@ -71,69 +71,69 @@ s_finalizador:  .asciiz ";"
 
 s_undefined:    .asciiz "instrução não definida"
 #
-s_zero: .asciiz 00000
-s_at:   .asciiz 00001
-s_v0:   .asciiz 00010
-s_v1:   .asciiz 00011 
-s_a0:   .asciiz 00100
-s_a1:   .asciiz 00101
-s_a2:   .asciiz 00110
-s_a3:   .asciiz 00111
-s_t0:   .asciiz 01000
-s_t1:   .asciiz 01001
-s_t2:   .asciiz 01010
-s_t3:   .asciiz 01011
-s_t4:   .asciiz 01100
-s_t5:   .asciiz 01101
-s_t6:   .asciiz 01110
-s_t7:   .asciiz 01111
-s_s0:   .asciiz 10000
-s_s1:   .asciiz 10001
-s_s2:   .asciiz 10010
-s_s3:   .asciiz 10011
-s_s4:   .asciiz 10100
-s_s5:   .asciiz 10101
-s_s6:   .asciiz 10110
-s_s7:   .asciiz 10111
-s_t8:   .asciiz 11000
-s_t9:   .asciiz 11001
-s_k0:   .asciiz 11010
-s_k1:   .asciiz 11011
-s_gp:   .asciiz 11100
-s_sp:   .asciiz 11101
-s_fp:   .asciiz 11110
-s_ra:   .asciiz 11111
-s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav: .asciiz 000000
-s_opcode_lw: .asciiz 100011
-s_opcode_sw: .asciiz 101011
-s_opcode_j:  .asciiz 000010
-s_opcode_jal:  .asciiz 000011
-s_opcode_bne:  .asciiz 000100
-s_opcode_bne:  .asciiz 000101
-s_opcode_lui:  .asciiz 001111
-s_opcode_addi: .asciiz 001000
-s_opcode_andi: .asciiz 001100
-s_opcode_ori:   .asciiz 001101
-s_opcode_xori:  .asciiz 001110
-s_opcode_bgez:  .asciiz 000001
-s_shamt: .asciiz 000000
-s_function_add: .asciiz 100000
-s_function_sub: .asciiz 100010
-s_function_and:  .asciiz 100100
-s_function_or:  .asciiz 100101
-s_function_nor:  .asciiz 100111
-s_function_xor:  .asciiz 100110 
-s_function_jr:  .asciiz 001000
-s_function_slt:  .asciiz 101010
-s_function_addu:  .asciiz 100001
-s_function_subu:  .asciiz 100011
-s_function_sll:  .asciiz 000000
-s_function_srl:  .asciiz  000010
-s_function_mult:  .asciiz 011000
-s_function_div:  .asciiz 011010
-s_function_mfhi:  .asciiz 010000
-s_function_mflo:  .asciiz 010010
-s_function_srav:  .asciiz 000111
+s_zero: .asciiz "00000"
+s_at:   .asciiz "00001"
+s_v0:   .asciiz "00010"
+s_v1:   .asciiz "00011" 
+s_a0:   .asciiz "00100"
+s_a1:   .asciiz "00101"
+s_a2:   .asciiz "00110"
+s_a3:   .asciiz "00111"
+s_t0:   .asciiz "01000"
+s_t1:   .asciiz "01001"
+s_t2:   .asciiz "01010"
+s_t3:   .asciiz "01011"
+s_t4:   .asciiz "01100"
+s_t5:   .asciiz "01101"
+s_t6:   .asciiz "01110"
+s_t7:   .asciiz "01111"
+s_s0:   .asciiz "10000"
+s_s1:   .asciiz "10001"
+s_s2:   .asciiz "10010"
+s_s3:   .asciiz "10011"
+s_s4:   .asciiz "10100"
+s_s5:   .asciiz "10101"
+s_s6:   .asciiz "10110"
+s_s7:   .asciiz "10111"
+s_t8:   .asciiz "11000"
+s_t9:   .asciiz "11001"
+s_k0:   .asciiz "11010"
+s_k1:   .asciiz "11011"
+s_gp:   .asciiz "11100"
+s_sp:   .asciiz "11101"
+s_fp:   .asciiz "11110"
+s_ra:   .asciiz "11111"
+s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav: .asciiz "000000"
+s_opcode_lw: .asciiz "100011"
+s_opcode_sw: .asciiz "101011"
+s_opcode_j:  .asciiz "000010"
+s_opcode_jal:  .asciiz "000011"
+s_opcode_bne:  .asciiz "000100"
+s_opcode_beq:  .asciiz "000101"
+s_opcode_lui:  .asciiz "001111"
+s_opcode_addi: .asciiz "001000"
+s_opcode_andi: .asciiz "001100"
+s_opcode_ori:   .asciiz "001101"
+s_opcode_xori:  .asciiz "001110"
+s_opcode_bgez:  .asciiz "000001"
+s_shamt: .asciiz "000000"
+s_function_add: .asciiz "100000"
+s_function_sub: .asciiz "100010"
+s_function_and:  .asciiz "100100"
+s_function_or:  .asciiz "100101"
+s_function_nor:  .asciiz "100111"
+s_function_xor:  .asciiz "100110" 
+s_function_jr:  .asciiz "001000"
+s_function_slt:  .asciiz "101010"
+s_function_addu:  .asciiz "100001"
+s_function_subu:  .asciiz "100011"
+s_function_sll:  .asciiz "000000"
+s_function_srl:  .asciiz  "000010"
+s_function_mult:  .asciiz "011000"
+s_function_div:  .asciiz "011010"
+s_function_mfhi:  .asciiz "010000"
+s_function_mflo:  .asciiz "010010"
+s_function_srav:  .asciiz "000111"
 #instruções tipo i e j não tem function
 #
 s_converter:  .space 32
@@ -252,7 +252,7 @@ main:
       beq $v0, 97, i_registradora  #se caracter = a, funcao que monta registrador tipo a
       beq $v0, 118, i_registradorv   #se caracter = v, funcao que monta registrador tipo v
       beq $v0, 122, i_registradorzero  #se caracter = z, funcao que monta registrador tipo zero
-      beq $v0, 107, i_reigstradork   #se caracter = k, funcao que monta registrador tipo k
+      beq $v0, 107, i_registradork   #se caracter = k, funcao que monta registrador tipo k
       beq $v0, 103, i_registradorgp  #se caracter = g, funcao que monta registrador tipo gp
       beq $v0, 102, i_registradorfp  #se caracter = fp, funcao que monta registrador tipo fp
       beq $v0, 114, i_registradorra  #se caracter = ra, funcao que monta registrador tipo ra
