@@ -174,6 +174,7 @@ main:
     beq $v0, 100, i_data  #se caracter for um 'd' vai pra função de escrita do .data 
     beq $v0, 116, i_text  #se caracter for um 't' vai pra função de escrita do .text
     beq $v0, 97, i_add    #se caracter for um 'a' vai pra função de escrita do add, addu e addi
+    beq $v0, 120, i_xor    #se caracter for um 'x' vai para função de escrita do xor, xori
 #########################################################################
     i_data: 
       #check if .data
@@ -215,9 +216,9 @@ main:
 #########################################################################
     i_add:
       jal readchar  #le caracter
-      bne $v0, 97, undefined  #se o proximo caracter não for 'a', instrução não definida.
+      bne $v0, 100, undefined  #se o proximo caracter não for 'd', instrução não definida.
       jal readchar  #le caracter
-      bne $v0, 97, undefined  #se o proximo caracter não for 'a', instrução não definida.
+      bne $v0, 100, undefined  #se o proximo caracter não for 'd', instrução não definida.
       jal readchar  #le caracter
       beq $v0, 117, i_addu  #se o proximo caracter for 'u', funçao de escrita do addu 
       beq $v0, 105, i_addi  #se o proximo caracter for 'i', funçao de escrita do addi
@@ -244,6 +245,14 @@ main:
       jal readchar #le caracter
       bne $v0, 10, undefined #se o proximo caracter não for um 'enter', instrução não definida  
       j parser  #volta pra função leitura de caracter até achar próxima instrução.
+    i_xor:
+      jal readchar  #le caracter
+      bne $v0, 111, undefined  #se o proximo caracter não for 'o', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 114, undefined  #se o proximo caracter não for 'r', instrução não definida.
+      jal readchar  #le caracter
+      #beq $v0, 105, i_xori  #se o proximo caracter for 'i', funçao de escrita do addi
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.  
 #########################################################################
     pegaregistrador:
       jal readchar  #le caracter
