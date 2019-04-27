@@ -1,0 +1,40 @@
+
+add $t1, $t2, $t3
+014b4820
+0000-00  01-010   0-1011    0100-1   000-00  10-0000
+op code|   rs	|   rt    |   rd   | shamt | funct
+
+s0 = opcode add
+s1 = code rs
+s2 = code rt
+s3 = code rd
+s4 = code shamt
+s5 = code funct
+
+a
+d
+d
+
+s0 = s_opcode_add
+s5 = s_function_add
+
+$
+t
+1
+
+s3 = s_t1
+
+$
+t
+2
+
+s1 = s_t2
+
+$
+t
+3
+
+s2 = s_t1
+																		 opcode | rs    |  rt   |  rd   | shamt | function
+string concatenada: s_opcode_add + s_t1 + s_t2 + s_t3 + s_function_add = 000000 + 01010 + 01011 + 01001 + 00000 + 100000 = 00000001010010110100100000100000
+
