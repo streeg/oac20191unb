@@ -116,7 +116,7 @@ s_opcode_andi: .asciiz "001100"
 s_opcode_ori:   .asciiz "001101"
 s_opcode_xori:  .asciiz "001110"
 s_opcode_bgez:  .asciiz "000001"
-s_shamt: .asciiz "000000"
+s_shamttipor: .asciiz "000000"
 s_function_add: .asciiz "100000"
 s_function_sub: .asciiz "100010"
 s_function_and:  .asciiz "100100"
@@ -172,7 +172,6 @@ main:
     jal readchar    #le caracter
     beq $v0, 10, parser   #se caracter for 'enter', continua caminhando no arquivo
     beq $v0, 32, parser   #se caracter for 'espaço', continua caminhando no arquivo
-    beq $v0, 36, pegaregistrador #se for um '$', monta registrador
     beq $v0, 100, i_data  #se caracter for um 'd' vai pra função de escrita do .data 
     beq $v0, 116, i_text  #se caracter for um 't' vai pra função de escrita do .text
     beq $v0, 97, i_add    #se caracter for um 'a' vai pra função de escrita do add, addu e addi
@@ -217,6 +216,10 @@ main:
       j main
 #########################################################################
     i_add:
+      move $t0, $zero #contador de registrador (0 registrador rd)
+      la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
+      la $s4, s_shamttipor #coloca shamt em tipos r em s4
+      la $s5, s_function_add #coloca o function do add em s5
       jal readchar  #le caracter
       bne $v0, 100, undefined  #se o proximo caracter não for 'd', instrução não definida.
       jal readchar  #le caracter
@@ -230,9 +233,24 @@ main:
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
       jal readchar
-      bne $v0, 44, undefined
-      j parser
-      #bne $v0, 10, undefined #se o proximo caracter não for um 'enter', instrução não definida  
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      j concatenastring
 #########################################################################
     i_addu:
       jal readchar #le caracter
@@ -275,64 +293,108 @@ main:
 ##########################################################################      
     i_registradort:
       jal readchar #le caracter
-      beq $v0, 48, i_tnumero0  #se t0, funcao que coloca string t0 no endereço s1
-      beq $v0, 49, i_tnumero1  #se t1, funcao que coloca string t1 no endereço s1
-      beq $v0, 50, i_tnumero2  #se t2, funcao que coloca string t2 no endereço s1
-      beq $v0, 51, i_tnumero3  #se t3, funcao que coloca string t3 no endereço s1
-      beq $v0, 52, i_tnumero4  #se t4, funcao que coloca string t4 no endereço s1
-      beq $v0, 53, i_tnumero5  #se t5, funcao que coloca string t5 no endereço s1
-      beq $v0, 54, i_tnumero6  #se t6, funcao que coloca string t6 no endereço s1
-      beq $v0, 55, i_tnumero7  #se t7, funcao que coloca string t7 no endereço s1
-      beq $v0, 56, i_tnumero8  #se t8, funcao que coloca string t8 no endereço s1
-      beq $v0, 57, i_tnumero9  #se t9, funcao que coloca string t9 no endereço s1
+      beq $v0, 48, i_tnumero0  #se t0, funcao que coloca string t0 no endereço s3 (rd)
+      beq $v0, 49, i_tnumero1  #se t1, funcao que coloca string t1 no endereço s3 (rd)
+      beq $v0, 50, i_tnumero2  #se t2, funcao que coloca string t2 no endereço s3 (rd)
+      beq $v0, 51, i_tnumero3  #se t3, funcao que coloca string t3 no endereço s3 (rd)
+      beq $v0, 52, i_tnumero4  #se t4, funcao que coloca string t4 no endereço s3 (rd)
+      beq $v0, 53, i_tnumero5  #se t5, funcao que coloca string t5 no endereço s3 (rd)
+      beq $v0, 54, i_tnumero6  #se t6, funcao que coloca string t6 no endereço s3 (rd)
+      beq $v0, 55, i_tnumero7  #se t7, funcao que coloca string t7 no endereço s3 (rd)
+      beq $v0, 56, i_tnumero8  #se t8, funcao que coloca string t8 no endereço s3 (rd)
+      beq $v0, 57, i_tnumero9  #se t9, funcao que coloca string t9 no endereço s3 (rd)
       j undefined      
+
     i_tnumero0:
-      la $s1, s_t0  #coloca string t0 em s1
+      beq $t0, 0, i_tnumero0rd
+      beq $t0, 1, i_tnumero0rs
+      beq $t0, 2, i_tnumero0rt
+      j undefined
+      i_tnumero0rd:
+      la $s3, s_t0  #coloca string t0 em s3 (rd)
+      j i_tnumero0continue
+      i_tnumero0rs:
+      la $s1, s_t0  #coloca string t0 em s3 (rs)
+      j i_tnumero0continue
+      i_tnumero0rt:
+      la $s2, s_t0  #coloca string t0 em s3 (rt)
+      j i_tnumero0continue
+    i_tnumero0continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
+
     i_tnumero1:
-      la $s1, s_t1  #coloca string t1 em s1
+      beq $t0, 0, i_tnumero1rd
+      beq $t0, 1, i_tnumero1rs
+      beq $t0, 2, i_tnumero1rt
+      j undefined
+      i_tnumero1rd:
+      la $s3, s_t1  #coloca string t1 em s3 (rd)
+      j i_tnumero1continue
+      i_tnumero1rs:
+      la $s1, s_t1  #coloca string t1 em s3 (rs)
+      j i_tnumero1continue
+      i_tnumero1rt:
+      la $s2, s_t1  #coloca string t1 em s3 (rt)
+      j i_tnumero1continue
+    i_tnumero1continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
+
     i_tnumero2:
-      la $s1, s_t2  #coloca string t2 em s1
+
+      beq $t0, 0, i_tnumero2rd
+      beq $t0, 1, i_tnumero2rs
+      beq $t0, 2, i_tnumero2rt
+      j undefined
+      i_tnumero2rd:
+      la $s3, s_t2  #coloca string t2 em s3 (rd)
+      j i_tnumero2continue
+      i_tnumero2rs:
+      la $s1, s_t2  #coloca string t2 em s3 (rs)
+      j i_tnumero2continue
+      i_tnumero2rt:
+      la $s2, s_t2  #coloca string t2 em s3 (rt)
+      j i_tnumero2continue
+    i_tnumero2continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
-      addi $sp, $sp, 4 #zera a pilha      
+      addi $sp, $sp, 4 #zera a pilha
       jr $ra
+
     i_tnumero3:
-      la $s1, s_t3  #coloca string t3 em s1
+      la $s3, s_t3  #coloca string t3 em s3 (rd)
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
     i_tnumero4:
-      la $s1, s_t4  #coloca string t4 em s1
+      la $s3, s_t4  #coloca string t4 em s3 (rd)
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
     i_tnumero5:
-      la $s1, s_t5  #coloca string t5 em s1
+      la $s3, s_t5  #coloca string t5 em s3 (rd)
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
     i_tnumero6:
-      la $s1, s_t6  #coloca string t6 em s1
+      la $s3, s_t6  #coloca string t6 em s3 (rd)
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
     i_tnumero7:
-      la $s1, s_t7  #coloca string t7 em s1
+      la $s3, s_t7  #coloca string t7 em s3 (rd)
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
     i_tnumero8:
-      la $s1, s_t8  #coloca string t8 em s1
+      la $s3, s_t8  #coloca string t8 em s3 (rd)
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
     i_tnumero9:
-      la $s1, s_t9  #coloca string t9 em s1
+      la $s3, s_t9  #coloca string t9 em s3 (rd)
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
@@ -340,103 +402,103 @@ main:
     i_registradors_sp:
       jal readchar #le caracter
       beq $v0, 112, i_registradorsp
-      beq $v0, 48, i_snumero0  #se s0, funcao que coloca string s0 no endereço s1
-      beq $v0, 49, i_snumero1  #se s1, funcao que coloca string s1 no endereço s1
-      beq $v0, 50, i_snumero2  #se s2, funcao que coloca string s2 no endereço s1
-      beq $v0, 51, i_snumero3  #se s3, funcao que coloca string s3 no endereço s1
-      beq $v0, 52, i_snumero4  #se s4, funcao que coloca string s4 no endereço s1
-      beq $v0, 53, i_snumero5  #se s5, funcao que coloca string s5 no endereço s1
-      beq $v0, 54, i_snumero6  #se s6, funcao que coloca string s6 no endereço s1
-      beq $v0, 55, i_snumero7  #se s7, funcao que coloca string s7 no endereço s1
+      beq $v0, 48, i_snumero0  #se s0, funcao que coloca string s0 no endereço s3 (rd)
+      beq $v0, 49, i_snumero1  #se s3 (rd), funcao que coloca string s3 (rd) no endereço s3 (rd)
+      beq $v0, 50, i_snumero2  #se s2, funcao que coloca string s2 no endereço s3 (rd)
+      beq $v0, 51, i_snumero3  #se s3, funcao que coloca string s3 no endereço s3 (rd)
+      beq $v0, 52, i_snumero4  #se s4, funcao que coloca string s4 no endereço s3 (rd)
+      beq $v0, 53, i_snumero5  #se s5, funcao que coloca string s5 no endereço s3 (rd)
+      beq $v0, 54, i_snumero6  #se s6, funcao que coloca string s6 no endereço s3 (rd)
+      beq $v0, 55, i_snumero7  #se s7, funcao que coloca string s7 no endereço s3 (rd)
       j undefined
     i_snumero0:
-      la $s1, s_s0  #coloca string s0 em s1
+      la $s3, s_s0  #coloca string s0 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra 
     i_snumero1:
-      la $s1, s_s1  #coloca string s1 em s1
+      la $s3, s_s3 (rd)  #coloca string s3 (rd) em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
     i_snumero2:
-      la $s1, s_s2  #coloca string s2 em s1
+      la $s3, s_s2  #coloca string s2 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
     i_snumero3:
-      la $s1, s_s3  #coloca string s3 em s1
+      la $s3, s_s3  #coloca string s3 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
     i_snumero4:
-      la $s1, s_s4  #coloca string s4 em s1
+      la $s3, s_s4  #coloca string s4 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
     i_snumero5:
-      la $s1, s_s5  #coloca string s5 em s1
+      la $s3, s_s5  #coloca string s5 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
     i_snumero6:
-      la $s1, s_s6  #coloca string s6 em s1
+      la $s3, s_s6  #coloca string s6 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
     i_snumero7:
-      la $s1, s_s7  #coloca string s7 em s1
+      la $s3, s_s7  #coloca string s7 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
     i_registradorsp:
-      la $s1, s_sp #coloca string sp em s1
+      la $s3, s_sp #coloca string sp em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
 
     i_registradora:
       jal readchar #le caracter
-      beq $v0, 48, i_anumero0  #se a0, funcao que coloca string a0 no endereço s1
-      beq $v0, 49, i_anumero1  #se a1, funcao que coloca string a1 no endereço s1
-      beq $v0, 50, i_anumero2  #se a2, funcao que coloca string a2 no endereço s1
-      beq $v0, 51, i_anumero3  #se a3, funcao que coloca string a3 no endereço s1
+      beq $v0, 48, i_anumero0  #se a0, funcao que coloca string a0 no endereço s3 (rd)
+      beq $v0, 49, i_anumero1  #se a1, funcao que coloca string a1 no endereço s3 (rd)
+      beq $v0, 50, i_anumero2  #se a2, funcao que coloca string a2 no endereço s3 (rd)
+      beq $v0, 51, i_anumero3  #se a3, funcao que coloca string a3 no endereço s3 (rd)
       j undefined
 
     i_anumero0:
-      la $s1, s_a0  #coloca string a0 em s1
+      la $s3, s_a0  #coloca string a0 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra 
     i_anumero1:
-      la $s1, s_a1  #coloca string a1 em s1
+      la $s3, s_a1  #coloca string a1 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
     i_anumero2:
-      la $s1, s_a2  #coloca string a2 em s1
+      la $s3, s_a2  #coloca string a2 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
     i_anumero3:
-      la $s1, s_a3  #coloca string a3 em s1
+      la $s3, s_a3  #coloca string a3 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra         
 
     i_registradorv:
       jal readchar #le caracter
-      beq $v0, 48, i_vnumero0  #se v0, funcao que coloca string v0 no endereço s1
-      beq $v0, 49, i_vnumero1  #se v1, funcao que coloca string v1 no endereço s1
+      beq $v0, 48, i_vnumero0  #se v0, funcao que coloca string v0 no endereço s3 (rd)
+      beq $v0, 49, i_vnumero1  #se v1, funcao que coloca string v1 no endereço s3 (rd)
       j undefined
 
     i_vnumero0:
-      la $s1, s_a0  #coloca string v0 em s1
+      la $s3, s_a0  #coloca string v0 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra 
     i_vnumero1:
-      la $s1, s_a1  #coloca string v1 em s1
+      la $s3, s_a1  #coloca string v1 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra  
@@ -448,60 +510,60 @@ main:
       jal readchar #le caracter
       bne $v0, 114, undefined
       jal readchar #le caracter
-      beq $v0, 111, i_znumero #se 'zero', funcao que coloca string zero no endereço s1
+      beq $v0, 111, i_znumero #se 'zero', funcao que coloca string zero no endereço s3 (rd)
 
     i_znumero:
-      la $s1, s_zero
+      la $s3, s_zero
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra  
 
     i_registradork:
       jal readchar #le caracter
-      beq $v0, 48, i_knumero0  #se k0, funcao que coloca string k0 no endereço s1
-      beq $v0, 49, i_knumero1  #se k1, funcao que coloca string k1 no endereço s1
+      beq $v0, 48, i_knumero0  #se k0, funcao que coloca string k0 no endereço s3 (rd)
+      beq $v0, 49, i_knumero1  #se k1, funcao que coloca string k1 no endereço s3 (rd)
       j undefined
 
     i_knumero0:
-      la $s1, s_k0  #coloca string k0 em s1
+      la $s3, s_k0  #coloca string k0 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra 
     i_knumero1:
-      la $s1, s_k1  #coloca string k1 em s1
+      la $s3, s_k1  #coloca string k1 em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra 
 
     i_registradorgp:
       jal readchar #le caracter
-      beq $v0, 112, i_gpnumero #se gp, funcao que coloca string gp, no endereço s1
+      beq $v0, 112, i_gpnumero #se gp, funcao que coloca string gp, no endereço s3 (rd)
       j undefined
 
     i_gpnumero:
-      la $s1, s_gp  #coloca string gp em s1
+      la $s3, s_gp  #coloca string gp em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra 
 
     i_registradorfp:
       jal readchar #le caracter
-      beq $v0, 112, i_fpnumero #se fp, funcao que coloca string fp, no endereço s1
+      beq $v0, 112, i_fpnumero #se fp, funcao que coloca string fp, no endereço s3 (rd)
       j undefined
 
     i_fpnumero:
-      la $s1, s_fp  #coloca string fp em s1
+      la $s3, s_fp  #coloca string fp em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra     
 
     i_registradorra:
       jal readchar #le caracter
-      beq $v0, 97, i_ranumero #se ra, funcao que coloca string ra, no endereço s1
+      beq $v0, 97, i_ranumero #se ra, funcao que coloca string ra, no endereço s3 (rd)
       j undefined
 
     i_ranumero:
-      la $s1, s_fp  #coloca string ra em s1
+      la $s3, s_fp  #coloca string ra em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra 
