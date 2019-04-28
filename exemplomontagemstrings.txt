@@ -34,7 +34,6 @@ $
 t
 3
 
-s2 = s_t1
+s2 = s_t3
 																		 opcode | rs    |  rt   |  rd   | shamt | function
 string concatenada: s_opcode_add + s_t1 + s_t2 + s_t3 + s_function_add = 000000 + 01010 + 01011 + 01001 + 00000 + 100000 = 00000001010010110100100000100000
-

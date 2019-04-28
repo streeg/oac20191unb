@@ -116,7 +116,7 @@ s_opcode_andi: .asciiz "001100"
 s_opcode_ori:   .asciiz "001101"
 s_opcode_xori:  .asciiz "001110"
 s_opcode_bgez:  .asciiz "000001"
-s_shamttipor: .asciiz "000000"
+s_shamttipor: .asciiz "00000"
 s_function_add: .asciiz "100000"
 s_function_sub: .asciiz "100010"
 s_function_and:  .asciiz "100100"
@@ -136,7 +136,11 @@ s_function_mflo:  .asciiz "010010"
 s_function_srav:  .asciiz "000111"
 #instruções tipo i e j não tem function
 #
-s_converter:  .space 32
+s_converted:  .space 32
+s_constroi1: .space 32
+s_constroi2: .space 32
+s_constroi3: .space 32
+s_constroi4: .space 32
 buffer:   .space  4
 
         .text
@@ -209,7 +213,7 @@ main:
       li   $a2, 81       # hardcoded buffer length (size of buffer_data_init in decimal)
       syscall            # write to file
 
-      j main
+      j parser
 #########################################################################
     i_text:
       #check if .text
@@ -228,7 +232,7 @@ main:
       li   $a2, 80       # hardcoded buffer length (size of buffer_data_init in decimal)
       syscall            # write to file
       beq $v0, 10, parser #se o proximo caracter for 'enter', volta pra função leitura de caracter até achar próxima instrução.
-      j main
+      j parser
 #########################################################################
     i_add:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -240,10 +244,10 @@ main:
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
       la $s4, s_shamttipor #coloca shamt em tipos r em s4
       la $s5, s_function_add #coloca o function do add em s5
-      jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
       jal readchar
       addi $t0, $t0, 1  #incrementa contador
@@ -378,8 +382,8 @@ main:
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
 #########################################################################
     pegaregistrador:
-      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-      sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      #addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+      #sw $ra, 0($sp)     #salva o endereço de $ra em sp
       beq $v0, 116, i_registradort  #se caracter = t, funcao que monta registrador tipo t
       beq $v0, 115, i_registradors_sp  #se caracter = s, funcao que monta registrador tipo s/sp
       beq $v0, 97, i_registradora  #se caracter = a, funcao que monta registrador tipo a
@@ -393,6 +397,7 @@ main:
       jr $ra  #volta pra função leitura de caracter até achar próxima instrução.
 ##########################################################################
     i_registradort:
+      
       jal readchar #le caracter
       beq $v0, 48, i_tnumero0  #se t0, funcao que coloca string t0 no endereço s3 (rd)
       beq $v0, 49, i_tnumero1  #se t1, funcao que coloca string t1 no endereço s3 (rd)
@@ -937,8 +942,8 @@ main:
 
     i_znumero:
       la $s3, s_zero
-      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-      sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      lw $ra, 0($sp)  #lê valor de ra que estava na pilha
+      addi $sp, $sp, 4 #zera a pilha
       jr $ra
 
     i_registradork:
@@ -949,13 +954,13 @@ main:
 
     i_knumero0:
       la $s3, s_k0  #coloca string k0 em s3 (rd)
-      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-      sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      lw $ra, 0($sp)  #lê valor de ra que estava na pilha
+      addi $sp, $sp, 4 #zera a pilha
       jr $ra
     i_knumero1:
       la $s3, s_k1  #coloca string k1 em s3 (rd)
-      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-      sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      lw $ra, 0($sp)  #lê valor de ra que estava na pilha
+      addi $sp, $sp, 4 #zera a pilha
       jr $ra
 
     i_registradorgp:
@@ -965,8 +970,8 @@ main:
 
     i_gpnumero:
       la $s3, s_gp  #coloca string gp em s3 (rd)
-      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-      sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      lw $ra, 0($sp)  #lê valor de ra que estava na pilha
+      addi $sp, $sp, 4 #zera a pilha
       jr $ra
 
     i_registradorfp:
@@ -976,8 +981,8 @@ main:
 
     i_fpnumero:
       la $s3, s_fp  #coloca string fp em s3 (rd)
-      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-      sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      lw $ra, 0($sp)  #lê valor de ra que estava na pilha
+      addi $sp, $sp, 4 #zera a pilha
       jr $ra
 
     i_registradorra:
@@ -987,48 +992,107 @@ main:
 
     i_ranumero:
       la $s3, s_fp  #coloca string ra em s3 (rd)
-      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-      sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      lw $ra, 0($sp)  #lê valor de ra que estava na pilha
+      addi $sp, $sp, 4 #zera a pilha
       jr $ra
 #########################################################################
-# Concatenate string
-# Ideia: concatenar as strings respectivas dos tipos R em seus campos. Converter string para hexa usando shift de bits. Escrever for para dar update no endereço de 4 em 4 em hexa. Em seguida adicionar código convertido de string pra hexa ao lado.
+concatenate:
 # Copy first string to result buffer
-#la $a0, str1
-#la $a1, result
-#jal strcopier
-#nop
+la $a0, ($s0)
+la $a1, s_constroi1
+jal strcopier
+nop
 
 # Concatenate second string on result buffer
-#la $a0, str2
-#or $a1, $v0, $zero
-#jal strcopier
-#nop
-#j finish
-#nop
+la $a0, ($s3)
+or $a1, $v0, $zero
+jal strcopier
+nop
+j concatenate2
+nop
+
+
+
+concatenate2:
+# Copy first string to result buffer
+la $a0, s_constroi1
+la $a1, s_constroi2
+jal strcopier
+nop
+
+# Concatenate second string on result buffer
+la $a0, ($s1)
+or $a1, $v0, $zero
+jal strcopier
+nop
+
+concatenate3:
+# Copy first string to result buffer
+la $a0, s_constroi2
+la $a1, s_constroi3
+jal strcopier
+nop
+
+# Concatenate second string on result buffer
+la $a0, ($s2)
+or $a1, $v0, $zero
+jal strcopier
+nop
+
+concatenate4:
+# Copy first string to result buffer
+la $a0, s_constroi3
+la $a1, s_constroi4
+jal strcopier
+nop
+
+# Concatenate second string on result buffer
+la $a0, ($s4)
+or $a1, $v0, $zero
+jal strcopier
+nop
+
+concatenate5:
+# Copy first string to result buffer
+la $a0, s_constroi4
+la $a1, s_converted
+jal strcopier
+nop
+
+# Concatenate second string on result buffer
+la $a0, ($s5)
+or $a1, $v0, $zero
+jal strcopier
+nop
+j finish_concatenate
+nop
 
 # String copier function
-#strcopier:
-#or $t0, $a0, $zero # Source
-#or $t1, $a1, $zero # Destination
+strcopier:
+or $t0, $a0, $zero # Source
+or $t1, $a1, $zero # Destination
 
-#loop:
-#lb $t2, 0($t0)
-#beq $t2, $zero, end
-#addiu $t0, $t0, 1
-#sb $t2, 0($t1)
-#addiu $t1, $t1, 1
-#b loop
-#nop
+loop_concatenate:
+lb $t2, 0($t0)
+beq $t2, $zero, end_concatenate
+addiu $t0, $t0, 1
+sb $t2, 0($t1)
+addiu $t1, $t1, 1
+b loop_concatenate
+nop
 
-#end:
-#or $v0, $t1, $zero # Return last position on result buffer
-#jr $ra
-#nop
+end_concatenate:
+or $v0, $t1, $zero # Return last position on result buffer
+jr $ra
+nop
+#printa pra teste
+finish_concatenate:
+li $v0, 4
+la $t0, s_converted
+add $a0, $t0, $zero
+syscall
+nop
 
-#finish:
-#j finish
-#nop
 #########################################################################
 readchar:
   li $v0,14 # prepara para ler caracter do arquivo
@@ -1039,6 +1103,8 @@ readchar:
   beq $v0, $0, loopend  #se eof, fim leitura
   lb $v0,buffer # le um byte armazenado em buffer
 #########################################################################
+#  addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+#  sw $v0, 0($sp)     #salva o endereço de $ra em sp
 #  print:
 #    li $v0, 11    # prepara para escrever (printf)
 #    move $a0, $t1 # escreve caracter no buffer
@@ -1047,6 +1113,8 @@ loopend: #fim leitura/print
 #  li $v0, 1
 #  add $a0, $zero, $t1
 #  syscall
+#	lw $v0, 0($sp)  #lê valor de ra que estava na pilha
+#	addi $sp, $sp, 4 #zera a pilha
   jr $ra
 #########################################################################
 #########################################################################
