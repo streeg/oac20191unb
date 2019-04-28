@@ -284,7 +284,7 @@ main:
       jal readchar #le caracter
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
       la $s4, s_shamttipor #coloca shamt em tipos r em s4
-      la $s5, s_function_add #coloca o function do add em s5
+      la $t9, s_function_add #coloca o function do add em s5
       jal pegaregistrador #função que pega registrador
       jal readchar
       addi $t0, $t0, 1  #incrementa contador
@@ -304,7 +304,7 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      #j concatenastring
+      j concatenate
 #########################################################################
     i_addu:
       jal readchar #le caracter
@@ -313,7 +313,7 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
       la $s4, s_shamttipor #coloca shamt em tipos r em s4
-      la $s5, s_function_addu #coloca o function do addu em s5
+      la $t9, s_function_addu #coloca o function do addu em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
       jal readchar
@@ -356,7 +356,7 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
       la $s4, s_shamttipor #coloca shamt em tipos r em s4
-      la $s5, s_function_sub #coloca o function do sub em s5
+      la $t9, s_function_sub #coloca o function do sub em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
       jal readchar
@@ -386,7 +386,7 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
       la $s4, s_shamttipor #coloca shamt em tipos r em s4
-      la $s5, s_function_subu #coloca o function do subu em s5
+      la $t9, s_function_subu #coloca o function do subu em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
       jal readchar
@@ -419,8 +419,8 @@ main:
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
 #########################################################################
     pegaregistrador:
-      #addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-      #sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+      sw $ra, 0($sp)     #salva o endereço de $ra em sp
       beq $v0, 116, i_registradort  #se caracter = t, funcao que monta registrador tipo t
       beq $v0, 115, i_registradors_sp  #se caracter = s, funcao que monta registrador tipo s/sp
       beq $v0, 97, i_registradora  #se caracter = a, funcao que monta registrador tipo a
@@ -1097,7 +1097,7 @@ jal strcopier
 nop
 
 # Concatenate second string on result buffer
-la $a0, ($s5)
+la $a0, ($t9)
 or $a1, $v0, $zero
 jal strcopier
 nop
@@ -1222,12 +1222,12 @@ bne $t3, 48, else_1101
 bne $t2, 48, else_1101
   j caracterdoze
 else_1101: #1101
-bne $t5, 49, delse_1110
-bne $t4, 49, delse_1110
-bne $t3, 48, delse_1110
-bne $t2, 49, delse_1110
-  j treze
-delsecaracter_1110: #1110
+bne $t5, 49, else_1110
+bne $t4, 49, else_1110
+bne $t3, 48, else_1110
+bne $t2, 49, else_1110
+  j caractertreze
+else_1110: #1110
 bne $t5, 49, else_1111
 bne $t4, 49, else_1111
 bne $t3, 49, else_1111
