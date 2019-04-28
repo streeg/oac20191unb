@@ -1174,10 +1174,10 @@ bne $t3, 49, else_0101
 bne $t2, 48, else_0101
   j caracterquatro
 else_0101: #0101
-bne $t5, 48, else_0110
-bne $t4, 49, else_0110
-bne $t3, 48, else_0110
-bne $t2, 49, else_0110
+bne $t5, 49, else_0110
+bne $t4, 48, else_0110
+bne $t3, 49, else_0110
+bne $t2, 48, else_0110
   j caractercinco
 else_0110: #0110
 bne $t5, 48, else_0111
@@ -1186,16 +1186,16 @@ bne $t3, 49, else_0111
 bne $t2, 48, else_0111
   j caracterseis  
 else_0111: #0111
-bne $t5, 48, else_1000
+bne $t5, 49, else_1000
 bne $t4, 49, else_1000
 bne $t3, 49, else_1000
-bne $t2, 49, else_1000
+bne $t2, 48, else_1000
   j caractersete
 else_1000: #1000
-bne $t5, 49, else_1001
+bne $t5, 48, else_1001
 bne $t4, 48, else_1001
 bne $t3, 48, else_1001
-bne $t2, 48, else_1001
+bne $t2, 49, else_1001
   j caracteroito
 else_1001: #1001
 bne $t5, 49, else_1010
@@ -1204,34 +1204,34 @@ bne $t3, 48, else_1010
 bne $t2, 49, else_1010
   j caracternove
 else_1010: #1010
-bne $t5, 49, else_1011
-bne $t4, 48, else_1011
-bne $t3, 49, else_1011
-bne $t2, 48, else_1011
+bne $t5, 48, else_1011
+bne $t4, 49, else_1011
+bne $t3, 48, else_1011
+bne $t2, 49, else_1011
   j caracterdez
 else_1011: #1011
 bne $t5, 49, else_1100
-bne $t4, 48, else_1100
-bne $t3, 49, else_1100
+bne $t4, 49, else_1100
+bne $t3, 48, else_1100
 bne $t2, 49, else_1100
   j caracteronze
 else_1100: #1100
-bne $t5, 49, else_1101
-bne $t4, 49, else_1101
-bne $t3, 48, else_1101
-bne $t2, 48, else_1101
+bne $t5, 48, else_1101
+bne $t4, 48, else_1101
+bne $t3, 49, else_1101
+bne $t2, 49, else_1101
   j caracterdoze
 else_1101: #1101
 bne $t5, 49, else_1110
-bne $t4, 49, else_1110
-bne $t3, 48, else_1110
+bne $t4, 48, else_1110
+bne $t3, 49, else_1110
 bne $t2, 49, else_1110
   j caractertreze
 else_1110: #1110
-bne $t5, 49, else_1111
+bne $t5, 48, else_1111
 bne $t4, 49, else_1111
 bne $t3, 49, else_1111
-bne $t2, 48, else_1111
+bne $t2, 49, else_1111
   j caractercatorze
 else_1111: #1111
 bne $t5, 49, undefined_convertion

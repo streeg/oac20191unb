@@ -1,5 +1,5 @@
 .data
-result: .asciiz "000000010000100101010000000100000"
+result: .asciiz "000001000000010101001000010000000"				
 s_hex0: .asciiz "0"
 s_hex1: .asciiz "1"
 s_hex2: .asciiz "2"
