@@ -1,17 +1,17 @@
-#Afonso - xx/xxxxxxx Guilherme Andreuce - 14/0141961
+#Afonso Dias - 14/0055771 Guilherme Andreuce - 14/0141961
 #------------------------------------------------------------------------------------------------------------------------------------
 #
 #Desenvolver uma aplicação que realize a partir de uma entrada um arquivo texto ASCII com o 
-#código-fonte elaborado por instruções assembly MIPS (arquivos com a extensão “.asm”), em que este seja 
+#código-fonte elaborado por instruções assembly MIPS (arquivos com a extensão “.asm�?), em que este seja 
 #capaz de gerar um código objeto montado em Hexadecimal em arquivo de texto ASCII, no formato MIF 
 #(Memory Inicialization File) de uma listagem de instruções pré-definidas e disponíveis no Requisito 2, e 
 #contidas especificamente nas áreas .text e .data do arquivo de entrada (.asm) fornecido pelo usuário da 
 #aplicação. Deverá ser gerado na saída um arquivo, também em codificação ASCII, com o mesmo nome do 
-#arquivo de entrada, com a extensão “.mif” (um arquivo para a área .data e outro para a área .text).
+#arquivo de entrada, com a extensão “.mif�? (um arquivo para a área .data e outro para a área .text).
 #Reforçando que a aplicação deverá comtemplar como argumento de entrada, além de todo o leque de 
 #registradores inteiros da CPU MIPS, incluindo as máscaras atribuídas aos registradores, bem como permitir a 
 #entrada no campo imediato de números inteiro e/ou decimais, ambos inteiros e sinalizados.
-#Deve ser observado que arquivos MIF (extensão “.mif”) possuem formatação e organização dos dados próprios
+#Deve ser observado que arquivos MIF (extensão “.mif�?) possuem formatação e organização dos dados próprios
 #em  áreas  e  setores  específicos do  arquivo  ASCII  gerado (mais  info.: 
 #https://wiki.sj.ifsc.edu.br/wiki/index.php/Inicializa%C3%A7%C3%A3o_de_mem%C3%B3ria_com_arquivos_.MIF_e_.HEX.  
 #No  moodle desta atividade de  laboratório são  disponibilizados  3(três)  arquivos  de  exemplo, 
@@ -174,8 +174,23 @@ main:
     beq $v0, 32, parser   #se caracter for 'espaço', continua caminhando no arquivo
     beq $v0, 100, i_data  #se caracter for um 'd' vai pra função de escrita do .data 
     beq $v0, 116, i_text  #se caracter for um 't' vai pra função de escrita do .text
-    beq $v0, 97, i_add    #se caracter for um 'a' vai pra função de escrita do add, addu e addi
+    beq $v0, 97, i_a    #se caracter for um 'a' vai pra função de verificacao comecando por 'a'
+    beq $v0, 115, i_s   #se caracter for um 's' vai pra função de verificacao comecando por 's'
     beq $v0, 120, i_xor    #se caracter for um 'x' vai para função de escrita do xor, xori
+#########################################################################
+  i_a:
+    jal readchar  #le caracter
+    beq $v0, 100, i_add  #se o proximo caracter for 'd', manda pro i_add para verificar se eh add, addi ou addiu
+    #beq $v0, 110, i_and  #se o proximo caracter for 'n', manda pro i_and para verificar se eh and ou andi
+    j undefined
+#########################################################################
+  i_s:
+    jal readchar  #le caracter
+    beq $v0, 117, i_sub  #se o proximo caracter for 'u', manda pro i_sub para verificar se eh sub ou subu
+    #beq $v0, 119, i_sw  #se o proximo caracter for 'w', manda pro i_sw
+    #beq $v0, 108, i_sll  #se o proximo caracter for 'l', manda pro i_sll para verificar se eh sll ou slt
+    #beq $v0, 114, i_srl  #se o proximo caracter for 'r', manda pro i_srl para verificar se eh srl ou srav
+    j undefined
 #########################################################################
     i_data: 
       #check if .data
@@ -217,11 +232,6 @@ main:
 #########################################################################
     i_add:
       move $t0, $zero #contador de registrador (0 registrador rd)
-      la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
-      la $s4, s_shamttipor #coloca shamt em tipos r em s4
-      la $s5, s_function_add #coloca o function do add em s5
-      jal readchar  #le caracter
-      bne $v0, 100, undefined  #se o proximo caracter não for 'd', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 100, undefined  #se o proximo caracter não for 'd', instrução não definida.
       jal readchar  #le caracter
@@ -230,6 +240,9 @@ main:
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
       jal readchar  #le caracter
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
+      la $s4, s_shamttipor #coloca shamt em tipos r em s4
+      la $s5, s_function_add #coloca o function do add em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
       jal readchar
@@ -250,14 +263,37 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenastring
+      #j concatenastring
 #########################################################################
     i_addu:
       jal readchar #le caracter
-      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
+      la $s4, s_shamttipor #coloca shamt em tipos r em s4
+      la $s5, s_function_addu #coloca o function do addu em s5
       jal readchar #le caracter
-      bne $v0, 36, undefined #se o proximo caracter não for um '$', instrução não definida.  
-      j parser  #volta pra função leitura de caracter até achar próxima instrução.
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      #j concatenastring
 #########################################################################
     i_addi:
       jal readchar #le caracter
@@ -267,6 +303,71 @@ main:
       jal readchar #le caracter
       bne $v0, 10, undefined #se o proximo caracter não for um 'enter', instrução não definida  
       j parser  #volta pra função leitura de caracter até achar próxima instrução.
+#########################################################################
+    i_sub:
+      move $t0, $zero #contador de registrador (0 registrador rd)
+      jal readchar  #le caracter
+      bne $v0, 098, undefined  #se o proximo caracter não for 'b', instrução não definida.
+      jal readchar  #le caracter
+      beq $v0, 117, i_subu  #se o proximo caracter for 'u', funçao de escrita do subu 
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
+      la $s4, s_shamttipor #coloca shamt em tipos r em s4
+      la $s5, s_function_sub #coloca o function do sub em s5
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      #j concatenastring
+#########################################################################
+    i_subu:
+      jal readchar #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
+      la $s4, s_shamttipor #coloca shamt em tipos r em s4
+      la $s5, s_function_subu #coloca o function do subu em s5
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.   
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      #j concatenastring
+#########################################################################
     i_xor:
       jal readchar  #le caracter
       bne $v0, 111, undefined  #se o proximo caracter não for 'o', instrução não definida.
@@ -274,7 +375,7 @@ main:
       bne $v0, 114, undefined  #se o proximo caracter não for 'r', instrução não definida.
       jal readchar  #le caracter
       #beq $v0, 105, i_xori  #se o proximo caracter for 'i', funçao de escrita do addi
-      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.  
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida. 
 #########################################################################
     pegaregistrador:
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
@@ -417,7 +518,7 @@ main:
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra 
     i_snumero1:
-      la $s3, s_s3 (rd)  #coloca string s3 (rd) em s3 (rd)
+      la $s3, s_s3  #coloca string s3 (rd) em s3 (rd)
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       jr $ra
