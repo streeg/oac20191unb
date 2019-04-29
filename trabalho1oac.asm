@@ -1142,7 +1142,6 @@ lb $t4, s_converted($t0)
 addi $t0, $t0, 1
 lb $t5, s_converted($t0)
 addi $t0, $t0, 1
-
 if: #0000
 bne $t5, 48, else_0001
 bne $t4, 48, else_0001
@@ -1239,6 +1238,7 @@ bne $t4, 49, undefined_convertion
 bne $t3, 49, undefined_convertion
 bne $t2, 49, undefined_convertion
   j caracterquinze
+
 
 
 

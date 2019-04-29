@@ -1,5 +1,5 @@
 .data
-result: .asciiz "000001000000010101001000010000000"				
+
 s_hex0: .asciiz "0"
 s_hex1: .asciiz "1"
 s_hex2: .asciiz "2"
@@ -18,19 +18,19 @@ s_hexE: .asciiz "E"
 s_hexF: .asciiz "F"
 hexa: .space 8
 
+s_converted:  .asciiz "000000010000100101010000000100000"
 
 .text
-
 move $t0, $zero
 loop_conversao:
 beq $t0, 32, end
-lb $t2, result($t0)
+lb $t2, s_converted($t0)
 addi $t0, $t0, 1
-lb $t3, result($t0)
+lb $t3, s_converted($t0)
 addi $t0, $t0, 1
-lb $t4, result($t0)
+lb $t4, s_converted($t0)
 addi $t0, $t0, 1
-lb $t5, result($t0)
+lb $t5, s_converted($t0)
 addi $t0, $t0, 1
 
 if: #0000
@@ -38,97 +38,97 @@ bne $t5, 48, else_0001
 bne $t4, 48, else_0001
 bne $t3, 48, else_0001
 bne $t2, 48, else_0001
-	j caracterzero
+  j caracterzero
 else_0001: #0001
-bne $t5, 49, else_0010
+bne $t5, 48, else_0010
 bne $t4, 48, else_0010
 bne $t3, 48, else_0010
-bne $t2, 48, else_0010
-	j caracterum
+bne $t2, 49, else_0010
+  j caracterum
 else_0010: #0010
 bne $t5, 48, else_0011
 bne $t4, 49, else_0011
 bne $t3, 48, else_0011
 bne $t2, 48, else_0011
-	j caracterdois
+  j caracterdois
 else_0011: #0011
 bne $t5, 49, else_0100
 bne $t4, 49, else_0100
 bne $t3, 48, else_0100
 bne $t2, 48, else_0100
-	j caractertres
+  j caractertres
 else_0100: #0100
 bne $t5, 48, else_0101
 bne $t4, 48, else_0101
 bne $t3, 49, else_0101
 bne $t2, 48, else_0101
-	j caracterquatro
+  j caracterquatro
 else_0101: #0101
 bne $t5, 48, else_0110
 bne $t4, 49, else_0110
 bne $t3, 48, else_0110
 bne $t2, 49, else_0110
-	j caractercinco
+  j caractercinco
 else_0110: #0110
 bne $t5, 48, else_0111
 bne $t4, 49, else_0111
 bne $t3, 49, else_0111
 bne $t2, 48, else_0111
-	j caracterseis	
+  j caracterseis  
 else_0111: #0111
 bne $t5, 48, else_1000
 bne $t4, 49, else_1000
 bne $t3, 49, else_1000
 bne $t2, 49, else_1000
-	j caractersete
+  j caractersete
 else_1000: #1000
 bne $t5, 49, else_1001
 bne $t4, 48, else_1001
 bne $t3, 48, else_1001
 bne $t2, 48, else_1001
-	j caracteroito
+  j caracteroito
 else_1001: #1001
 bne $t5, 49, else_1010
 bne $t4, 48, else_1010
 bne $t3, 48, else_1010
 bne $t2, 49, else_1010
-	j caracternove
+  j caracternove
 else_1010: #1010
 bne $t5, 49, else_1011
 bne $t4, 48, else_1011
 bne $t3, 49, else_1011
 bne $t2, 48, else_1011
-	j caracterdez
+  j caracterdez
 else_1011: #1011
 bne $t5, 49, else_1100
 bne $t4, 48, else_1100
 bne $t3, 49, else_1100
 bne $t2, 49, else_1100
-	j caracteronze
+  j caracteronze
 else_1100: #1100
 bne $t5, 49, else_1101
 bne $t4, 49, else_1101
 bne $t3, 48, else_1101
 bne $t2, 48, else_1101
-	j caracterdoze
+  j caracterdoze
 else_1101: #1101
-bne $t5, 49, delse_1110
-bne $t4, 49, delse_1110
-bne $t3, 48, delse_1110
-bne $t2, 49, delse_1110
-	j treze
-delsecaracter_1110: #1110
+bne $t5, 49, else_1110
+bne $t4, 49, else_1110
+bne $t3, 48, else_1110
+bne $t2, 49, else_1110
+  j caractertreze
+else_1110: #1110
 bne $t5, 49, else_1111
 bne $t4, 49, else_1111
 bne $t3, 49, else_1111
 bne $t2, 48, else_1111
-	j caractercatorze
+  j caractercatorze
 else_1111: #1111
 bne $t5, 49, undefined_convertion
 bne $t4, 49, undefined_convertion
 bne $t3, 49, undefined_convertion
 bne $t2, 49, undefined_convertion
-	j caracterquinze
+  j caracterquinze
 
 
 
@@ -231,4 +231,4 @@ syscall
 j loop_conversao
 
 undefined_convertion:
-j end
+end:
