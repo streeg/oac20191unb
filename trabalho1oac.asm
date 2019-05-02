@@ -47,9 +47,9 @@
 #------------------------------------------------------------------------------------------------------------------------------------
 #        /*************  Instructions template  **********
 #            _____________________________________________
-#            | OP  | RS  |  RD  |  RT  |  SHAMT  |  FUNCT |
+#            | OP  | RS  |  RT  |  RD  |  SHAMT  |  FUNCT |
 #            |  6  |  5  |  5   |   5  |     5   |    6   |
-#        R:  | OP  | RS  |  RD  |  RT  |  SHAMT  |  FUNCT |
+#        R:  | OP  | RS  |  RT  |  RD  |  SHAMT  |  FUNCT |
 #        I:  | OP  | RS  |  RT  |        ADDRES / IMM     |
 #        J:  | OP  |           TARGET / ADDRESS           |
 #        */
@@ -177,9 +177,27 @@ s_hexC: .asciiz "C"
 s_hexD: .asciiz "D"
 s_hexE: .asciiz "E"
 s_hexF: .asciiz "F"
+#conversao caracter numero hexa
+s_chex0: .asciiz "0000"
+s_chex1: .asciiz "0001"
+s_chex2: .asciiz "0010"
+s_chex3: .asciiz "0011"
+s_chex4: .asciiz "0100"
+s_chex5: .asciiz "0101"
+s_chex6: .asciiz "0110"
+s_chex7: .asciiz "0111"
+s_chex8: .asciiz "1000"
+s_chex9: .asciiz "1001"
+s_chexA: .asciiz "1010"
+s_chexB: .asciiz "1011"
+s_chexC: .asciiz "1100"
+s_chexD: .asciiz "1101"
+s_chexE: .asciiz "1110"
+s_chexF: .asciiz "1111"
 hexa: .space 8
 # 
 buffer:   .space  4
+teste_base: .space 16
 
 .text
 
@@ -377,13 +395,161 @@ main:
       j concatenate  
 #########################################################################
     i_addi:
+      move $t0, $zero #contador de registrador (0 registrador rd
+      la $t8, teste_base  #t8 tem a base do vetor
+      addi $t0, $t0, 1  #incrementa contador
       jal readchar #le caracter
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
       jal readchar #le caracter
       bne $v0, 36, undefined #se o proximo caracter não for um '$', instrução não definida.
+      la $s0, s_opcode_addi  #coloca opcode add em s0
       jal readchar #le caracter
-      bne $v0, 10, undefined #se o proximo caracter não for um 'enter', instrução não definida
-      j parser  #volta pra função leitura de caracter até achar próxima instrução.
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
+      jal i_number
+
+      
+##################################################################################################################################################
+	i_number: #monta vetor de caracteres em decimal em teste_base
+      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+      sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      move $t0, $zero  #anda de 4 em 4.
+      move $t2, $zero  #salva quantos numeros foram lidos
+    i_number1:
+    jal readchar
+		beq $v0, 48, digito_0	#se digito 0
+		beq $v0, 49, digito_1	#se digito 1
+		beq $v0, 50, digito_2	#se digito 2
+		beq $v0, 51, digito_3	#se digito 3	
+		beq $v0, 52, digito_4	#se digito 4
+		beq $v0, 53, digito_5	#se digito 5
+		beq $v0, 54, digito_6	#se digito 6
+		beq $v0, 55, digito_7	#se digito 7
+		beq $v0, 56, digito_8	#se digito 8
+		beq $v0, 57, digito_9	#se digito 9
+		beq $v0, 10, voltafunc #func que volta pra caler
+    bge $t1, 64, undefined 
+    j undefined
+	voltafunc:
+      lw $ra, 0($sp)     #salva o endereço de $ra em sp
+      addi $sp, $sp, 4  #prepara pilha pra receber 1 item
+  		jr $ra
+
+	digito_0:
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+  digito_1:
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+  digito_2:
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+  digito_3:
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+  digito_4:
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+  digito_5:
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+  digito_6:
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+  digito_7:	
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+  digito_8:
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+  digito_9:
+    addi $t1, $v0, -48
+    sw $t1, teste_base($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j i_number
+
+converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de parada. resultado armazenado em a0.
+   li $t3,0
+   li $t4,9
+   la $t0, teste_base        #address of string
+   lw $t1, ($t0)        #Get first digit of string
+   li $a1, 10           #Ascii of line feed
+   li $a0, 0            #accumulator
+   move $a2, $t1         #$a2=$t1 goto checkdigit
+   jal checkdigit
+   add $a0, $a0, $t1      #Accumulates
+   addi $t0, $t0, 4      #Advance string pointer 
+   lw $t1, ($t0)        #Get next digit
+
+buc1:   
+   beq $t1, $a1, print #if $t1=10(linefeed) then print
+   move $a2, $t1         #$a2=$t1 goto checkdigit
+   jal checkdigit
+   mul $t2, $a0, 10  #Multiply by 10
+   add $a0, $t2, $t1      #Accumulates
+   addi $t0, $t0, 4      #Advance string pointer 
+   lw $t1, ($t0)        #Get next digit 
+   b buc1
+
+print:  
+   li $v0, 1            #print integer $a0
+   syscall
+   b end
+
+checkdigit:
+   blt $a2, $t3, error  
+   bgt $a2, $t4, error
+   jr $ra
+
+error:
+   la $a0, msgerror
+   li $v0, 4            #print eror
+   syscall
+
+end:    
+   li $v0, 10           #end program
+   syscall
+
 ##################################################################################################################################################
     i_and:
       move $t0, $zero #contador de registrador (0 registrador rd)
