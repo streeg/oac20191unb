@@ -14,8 +14,9 @@ la	$a0, ask_str1
 syscall
 li	$v0, 5
 syscall
+# Aqui daria para passar por outro registrador, ao inves de $v
 move	$a0, $v0
-move $t4, $v0
+move $t4, $v0 # Contador do loop interno definido como entrada do usuario
 
 jal	loop
 
@@ -29,9 +30,9 @@ j __start
 print_bin:
 
 
-#addi $t4, $zero, 32	# loop counter
 loop:
 
+# nova linha
 li $v0, 11
 li $a0, 10
 syscall
@@ -41,13 +42,13 @@ j print
 
 print:	
 li $v0, 34
-addi $t1, $t1, 4
+addi $t1, $t1, 4 # Incrementando em 4
 move $a0, $t1
 syscall
 
 srl $t3, $t3, 1
-addi $t4, $t4, -1
+addi $t4, $t4, -1 # i--
 
-bne	$t4, $zero, loop
+bne	$t4, $zero, loop # while > 0
 
 jr	$ra
