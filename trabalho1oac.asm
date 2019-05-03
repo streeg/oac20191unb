@@ -70,6 +70,7 @@ buffer_text_address:  .space  8
 s_divisor:  .asciiz " : "
 s_finalizador:  .asciiz ";"
 
+msgerrodigito: .asciiz "The string does not contain valid digits."
 s_undefined:    .asciiz "instrução não definida"
 #
 s_tohex0: .asciiz "0"
@@ -197,7 +198,9 @@ s_chexF: .asciiz "1111"
 hexa: .space 8
 # 
 buffer:   .space  4
-teste_base: .space 16
+buffer_caracter_decimal: .space 16
+buffer_decimal_salvo: .space 16
+s_debug_de_pobre: .asciiz "passei aqui"
 
 .text
 
@@ -278,8 +281,6 @@ main:
 #########################################################################
     i_data:
       #check if .data
-      jal readchar   #le caracter
-      bne $v0, 97, undefined  #se o proximo caracter não for 'a', instrução não definida.
       jal readchar   #le caracter
       bne $v0, 116, undefined #se o proximo caracter não for 't', instrução não definida.
       jal readchar   #le caracter
@@ -396,7 +397,6 @@ main:
 #########################################################################
     i_addi:
       move $t0, $zero #contador de registrador (0 registrador rd
-      la $t8, teste_base  #t8 tem a base do vetor
       addi $t0, $t0, 1  #incrementa contador
       jal readchar #le caracter
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
@@ -418,139 +418,21 @@ main:
       bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
-      jal i_number
+      jal i_vetordecaracteresparadecimal
+      jal converte_pra_decimal
+      addi $t8, $t8, 3
+      la $s3, buffer_decimal_salvo($t8)
+      li $t0, 0x000000FF
+      and $t9, $s3, $t0
+      li $t0, 0x0000FF00
+      and $s4, $s3, $t0
+      li $t0, 0X00FF0000
+      and $s3, $s3, $t0
+      move $t0, $zero
+      j concatenateimediato
+      j debug_de_pobre
 
-      
-##################################################################################################################################################
-	i_number: #monta vetor de caracteres em decimal em teste_base
-      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-      sw $ra, 0($sp)     #salva o endereço de $ra em sp
-      move $t0, $zero  #anda de 4 em 4.
-      move $t2, $zero  #salva quantos numeros foram lidos
-    i_number1:
-    jal readchar
-		beq $v0, 48, digito_0	#se digito 0
-		beq $v0, 49, digito_1	#se digito 1
-		beq $v0, 50, digito_2	#se digito 2
-		beq $v0, 51, digito_3	#se digito 3	
-		beq $v0, 52, digito_4	#se digito 4
-		beq $v0, 53, digito_5	#se digito 5
-		beq $v0, 54, digito_6	#se digito 6
-		beq $v0, 55, digito_7	#se digito 7
-		beq $v0, 56, digito_8	#se digito 8
-		beq $v0, 57, digito_9	#se digito 9
-		beq $v0, 10, voltafunc #func que volta pra caler
-    bge $t1, 64, undefined 
-    j undefined
-	voltafunc:
-      lw $ra, 0($sp)     #salva o endereço de $ra em sp
-      addi $sp, $sp, 4  #prepara pilha pra receber 1 item
-  		jr $ra
-
-	digito_0:
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-  digito_1:
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-  digito_2:
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-  digito_3:
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-  digito_4:
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-  digito_5:
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-  digito_6:
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-  digito_7:	
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-  digito_8:
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-  digito_9:
-    addi $t1, $v0, -48
-    sw $t1, teste_base($t0)
-    addi $t0, $t0, 4
-    addi $t2, $t2, 1
-    j i_number
-
-converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de parada. resultado armazenado em a0.
-   li $t3,0
-   li $t4,9
-   la $t0, teste_base        #address of string
-   lw $t1, ($t0)        #Get first digit of string
-   li $a1, 10           #Ascii of line feed
-   li $a0, 0            #accumulator
-   move $a2, $t1         #$a2=$t1 goto checkdigit
-   jal checkdigit
-   add $a0, $a0, $t1      #Accumulates
-   addi $t0, $t0, 4      #Advance string pointer 
-   lw $t1, ($t0)        #Get next digit
-
-buc1:   
-   beq $t1, $a1, print #if $t1=10(linefeed) then print
-   move $a2, $t1         #$a2=$t1 goto checkdigit
-   jal checkdigit
-   mul $t2, $a0, 10  #Multiply by 10
-   add $a0, $t2, $t1      #Accumulates
-   addi $t0, $t0, 4      #Advance string pointer 
-   lw $t1, ($t0)        #Get next digit 
-   b buc1
-
-print:  
-   li $v0, 1            #print integer $a0
-   syscall
-   b end
-
-checkdigit:
-   blt $a2, $t3, error  
-   bgt $a2, $t4, error
-   jr $ra
-
-error:
-   la $a0, msgerror
-   li $v0, 4            #print eror
-   syscall
-
-end:    
-   li $v0, 10           #end program
-   syscall
-
-##################################################################################################################################################
+#########################################################################################################################      
     i_and:
       move $t0, $zero #contador de registrador (0 registrador rd)
       jal readchar  #le caracter
@@ -1608,7 +1490,7 @@ end:
       i_znumero1rd:
       la $s3, s_zero
       j i_znumero1continue
-	  i_znumero1rs:
+    i_znumero1rs:
       la $s1, s_zero
       j i_znumero1continue
       i_znumero1rt:
@@ -1652,7 +1534,7 @@ end:
       la $s3, s_k1  #coloca string k1 em s3 (rd)
       j i_knumero1continue
       i_knumero1rs:
-	  la $s1, s_k1  #coloca string k1 em s3 (rd)
+    la $s1, s_k1  #coloca string k1 em s3 (rd)
       j i_knumero1continue
       i_knumero1rt:
       la $s2, s_k1  #coloca string k1 em s3 (rd)
@@ -1732,7 +1614,141 @@ end:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
       addi $sp, $sp, 4 #zera a pilha
       jr $ra
-#########################################################################
+##################################################################################################################################################
+  i_vetordecaracteresparadecimal: #monta vetor de caracteres em decimal em buffer_caracter_decimal
+      addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+      sw $ra, 0($sp)     #salva o endereço de $ra em sp
+      move $t0, $zero  #anda de 4 em 4
+      addi $t0, $t0, 3
+      move $t2, $zero  #salva quantos numeros foram lidos
+      move $t1, $zero
+    vetordecaracteresparadecimalstart:
+    jal readchar
+    beq $v0, 48, digito_0 #se digito 0
+    beq $v0, 49, digito_1 #se digito 1
+    beq $v0, 50, digito_2 #se digito 2
+    beq $v0, 51, digito_3 #se digito 3  
+    beq $v0, 52, digito_4 #se digito 4
+    beq $v0, 53, digito_5 #se digito 5
+    beq $v0, 54, digito_6 #se digito 6
+    beq $v0, 55, digito_7 #se digito 7
+    beq $v0, 56, digito_8 #se digito 8
+    beq $v0, 57, digito_9 #se digito 9
+    beq $v0, 10, gobackcaller #func que volta pra caler
+    bge $t1, 64, undefined 
+    j undefined
+  gobackcaller:
+          lw $ra, 0($sp)     #salva o endereço de $ra em sp
+          addi $sp, $sp, 4  #prepara pilha pra receber 1 item
+          jr $ra
+
+   digito_0:
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+  digito_1:
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+  digito_2:
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+  digito_3:
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+  digito_4:
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+  digito_5:
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+  digito_6:
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+  digito_7: 
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+  digito_8:
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+  digito_9:
+    addi $t1, $v0, -48
+    sw $t1, buffer_caracter_decimal($t0)
+    addi $t0, $t0, 4
+    addi $t2, $t2, 1
+    j vetordecaracteresparadecimalstart
+
+converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de parada. resultado armazenado em a0.
+  #t2 tem contador de numeros em buffer
+  #quando t2 for = 0, cabou os numeros em buffer
+   addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+   sw $ra, 0($sp)     #salva o endereço de $ra em sp
+   li $t3,0
+   li $t4,9
+   move $t0, $zero
+   addi $t0, $t0, 3 
+   lw $t1, buffer_caracter_decimal($t0)        #Get first digit of string
+   li $a0, 0            #accumulator
+   move $a2, $t1         #$a2=$t1 goto checkdigit
+   jal checkdigit
+   add $a0, $a0, $t1      #Accumulates
+   addi $t0, $t0, 4      #Advance string pointer 
+   addi $t2, $t2, -1
+   lw $t1, buffer_caracter_decimal($t0)        #Get next digit
+
+buc1:   
+   ble $t2, $zero, salva_valor_decimal #if $t1=10(linefeed) then print
+   move $a2, $t1         #$a2=$t1 goto checkdigit
+   jal checkdigit
+   mul $t5, $a0, 10  #Multiply by 10
+   add $a0, $t5, $t1      #Accumulates
+   addi $t0, $t0, 4      #Advance string pointer
+   addi $t2, $t2, -1 
+   lw $t1, buffer_caracter_decimal($t0)        #Get next digit 
+   b buc1
+
+salva_valor_decimal:
+   
+  la $t0, buffer_decimal_salvo
+  addi $t0, $t0, 3
+  sw $a0, ($t0)
+  j gobackcaller
+
+checkdigit:
+   blt $a2, $t3, errodigito  
+   bgt $a2, $t4, errodigito
+   jr $ra
+
+errodigito:
+   la $a0, msgerrodigito
+   li $v0, 4            #print eror
+   syscall
+##################################################################################################################################################      
 concatenate:
 # Copy first string to result buffer
   la $a0, ($s0)
@@ -1829,6 +1845,107 @@ finish_concatenate:
   add $a0, $t0, $zero
   syscall
   nop
+  j convertehexa
+#########################################################################
+concatenateimediato:
+move $t0, $zero
+move $t1, $zero
+# Copy first string to result buffer
+  la $a0, ($s0)
+  la $a1, s_constroi1
+  jal strcopierimediato
+  nop
+# Concatenateimediato second string on result buffer
+  la $a0, ($s1)
+  or $a1, $v0, $zero
+  jal strcopierimediato
+  nop
+  j concatenateimediato2
+  nop
+  
+
+
+concatenateimediato2:
+# Copy first string to result buffer
+  la $a0, s_constroi1
+  la $a1, s_constroi2
+  jal strcopierimediato
+  nop
+
+# Concatenateimediato second string on result buffer
+  la $a0, ($s2)
+  or $a1, $v0, $zero
+  jal strcopierimediato
+  nop
+
+concatenateimediato3:
+# Copy first string to result buffer
+  la $a0, s_constroi2
+  la $a1, s_constroi3
+  jal strcopierimediato
+  nop
+
+# Concatenateimediato second string on result buffer
+  la $a0, ($t9)
+  or $a1, $v0, $zero
+  jal strcopierimediato
+  nop
+
+concatenateimediato4:
+# Copy first string to result buffer
+  la $a0, s_constroi3
+  la $a1, s_constroi4
+  jal strcopierimediato
+  nop
+
+# Concatenateimediato second string on result buffer
+  la $a0, ($s4)
+  or $a1, $v0, $zero
+  jal strcopierimediato
+  nop
+
+concatenateimediato5:
+# Copy first string to result buffer
+  la $a0, s_constroi4
+  la $a1, s_converted
+  jal strcopierimediato
+  nop
+
+# Concatenateimediato second string on result buffer
+  
+  la $a0, ($s3)
+  or $a1, $v0, $zero
+  jal strcopierimediato
+  nop
+  j finish_concatenateimediato
+  nop
+
+# String copier function
+strcopierimediato:
+  or $t0, $a0, $zero # Source
+  or $t1, $a1, $zero # Destination
+
+loop_concatenateimediato:
+  lb $t2, 0($t0)
+  beq $t2, $zero, end_concatenateimediato
+  addiu $t0, $t0, 1
+  sb $t2, 0($t1)
+  addiu $t1, $t1, 1
+  b loop_concatenateimediato
+  nop
+
+end_concatenateimediato:
+  or $v0, $t1, $zero # Return last position on result buffer
+  jr $ra
+  nop
+  #printa pra teste
+finish_concatenateimediato:
+  li $v0, 4
+  la $t0, s_converted
+  add $a0, $t0, $zero
+  syscall
+  nop
+  j convertehexa
 #########################################################################
 convertehexa:
   move $t0, $zero
@@ -2093,3 +2210,8 @@ undefined:
   syscall
   j end
 #########################################################################
+debug_de_pobre:
+
+  li $v0, 4
+  la $a0, s_debug_de_pobre
+  syscall
