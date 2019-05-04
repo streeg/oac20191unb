@@ -429,7 +429,7 @@ main:
       li $t0, 0X00FF0000
       and $s3, $s3, $t0
       move $t0, $zero
-      j concatenateimediato
+      #j concatenateimediato
       j debug_de_pobre
 
 #########################################################################################################################      
