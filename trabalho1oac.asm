@@ -83,12 +83,12 @@ s_tohex6: .asciiz "6"
 s_tohex7: .asciiz "7"
 s_tohex8: .asciiz "8"
 s_tohex9: .asciiz "9"
-s_tohexA: .asciiz "A"
-s_tohexB: .asciiz "B"
-s_tohexC: .asciiz "C"
-s_tohexD: .asciiz "D"
-s_tohexE: .asciiz "E"
-s_tohexF: .asciiz "F"
+s_tohexA: .asciiz "a"
+s_tohexB: .asciiz "b"
+s_tohexC: .asciiz "c"
+s_tohexD: .asciiz "d"
+s_tohexE: .asciiz "e"
+s_tohexF: .asciiz "f"
 s_zero_0_em_bin: .asciiz "00000"
 s_at_1_em_bin:   .asciiz "00001"
 s_v0_2_em_bin:   .asciiz "00010"
@@ -214,19 +214,21 @@ bufferarmazenanibble: .space 32
   move  $s5, $v0      # save the file descriptor for reading in $s5
 #########################################################################
   li   $v0, 13       # system call for open file
-  la   $a0, foutdata # output file name
+  la   $a0, fouttext # output file name
   li   $a1, 1        # Open for writing (flags are 0: read, 1: write)
   li   $a2, 0        # mode is ignored
   syscall            # open a file (file descriptor returned in $v0)
   move $s6, $v0      # save the file descriptor for writing data in $s6
 #########################################################################
   li   $v0, 13       # system call for open file
-  la   $a0, fouttext # output file name
+  la   $a0, foutdata # output file name
   li   $a1, 1        # Open for writing (flags are 0: read, 1: write)
   li   $a2, 0        # mode is ignored
   syscall            # open a file (file descriptor returned in $v0)
   move $s7, $v0      # save the file descriptor for writing text in $s6
-########################################################################
+################################################################################################################################################
+  move $t8, $zero    # contador endereço
+  addi $t8, $t8, 0x00400000 #contador endereço
 main:
   jal readchar       #le primeiro caracter
   bne $v0, 46, undefined #se o caracter não for um '.' não vai para o switch de instrução
@@ -2247,6 +2249,8 @@ convertehexa:
 #########################################################################
  
 armazenanibble:
+addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+sw $ra, 0($sp)     #salva o endereço de $ra em sp
 move $t0, $0
 move $t1, $0
 move $t2, $0
@@ -2387,8 +2391,6 @@ j escreveendereco
 #########################################################################
 
 escreveendereco:
-addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-sw $ra, 0($sp)     #salva o endereço de $ra em sp
 move $t3, $0
 addi $t3, $t3, 7
 lb $t0, bufferarmazenanibble($t3)
@@ -2415,8 +2417,8 @@ addi $t3, $t3, 8
 lb $t0, bufferarmazenanibble($t3)
 jal verificawdigito
 addi $t8, $t8, 4
-addi $sp, $sp, 4  #prepara pilha pra receber 1 item
 lw $ra, 0($sp)     #le o endereço de $ra em sp
+addi $sp, $sp, 4  #prepara pilha pra receber 1 item
 jr $ra
 
 
@@ -2552,8 +2554,6 @@ li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal
 syscall            # write to file
  jr $ra
 
-
-#########################################################################
 
 #########################################################################
 readchar:
