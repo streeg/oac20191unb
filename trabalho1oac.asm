@@ -1972,8 +1972,8 @@ finish_concatenate:
   la $t0, s_converted
   add $a0, $t0, $zero
   syscall
-  li $v0, 10
-  syscall
+  nop
+  j convertehexa
 #########################################################################
 concatenateimediato:
 move $t0, $zero
