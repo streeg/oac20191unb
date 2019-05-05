@@ -926,7 +926,7 @@ main:
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       beq $v0, 116, i_registradort  #se caracter = t, funcao que monta registrador tipo t
-      beq $v0, 115, i_registradors_sp_29_em_bin  #se caracter = s, funcao que monta registrador tipo s/sp
+      beq $v0, 115, i_registradors_sp  #se caracter = s, funcao que monta registrador tipo s/sp
       beq $v0, 97, i_registradora  #se caracter = a, funcao que monta registrador tipo a
       beq $v0, 118, i_registradorv   #se caracter = v, funcao que monta registrador tipo v
       beq $v0, 122, i_registradorzero  #se caracter = z, funcao que monta registrador tipo zero
@@ -1151,7 +1151,7 @@ main:
       jr $ra
 
 
-    i_registradors_sp_29_em_bin:
+    i_registradors_sp:
       jal readchar #le caracter
       beq $v0, 112, i_registradorsp
       beq $v0, 48, i_snumero0  #se s0, funcao que coloca string s0 no endereço s3 (rd)
