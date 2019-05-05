@@ -1,2 +1,2 @@
 .text
-div $s1, $t5
+mult $s1, $t5
