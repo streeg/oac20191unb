@@ -675,6 +675,7 @@ main:
 #########################################################################
     i_div:
       move $t0, $zero #contador de registrador (0 registrador rd)
+      addi $t0, $t0, 1  #incrementa contador
       jal readchar  #le caracter
       bne $v0, 118, undefined  #se o proximo caracter não for 'v', instrução não definida.
       jal readchar  #le caracter
@@ -686,15 +687,7 @@ main:
       la $t9, s_function_div #coloca o function do div em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      jal readchar
-      addi $t0, $t0, 1  #incrementa contador
-      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
-      jal readchar #le caracter
-      jal pegaregistrador #função que pega registrador
+      la $s3, s_zero_0_em_bin
       jal readchar
       addi $t0, $t0, 1  #incrementa contador
       bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.

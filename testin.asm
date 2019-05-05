@@ -1,2 +1,2 @@
 .text
-mfhi $t4
+div $s1, $t5
