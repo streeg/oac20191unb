@@ -1,2 +1,2 @@
 .text
-srl $t0, $t1, 12
+mflo $t4

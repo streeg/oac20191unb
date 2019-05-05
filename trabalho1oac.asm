@@ -865,7 +865,7 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
       la $s4, s_shamttipor #coloca shamt em tipos r em s4
-      la $t9, s_function_mfhi #coloca o function do subu em s5
+      la $t9, s_function_mfhi #coloca o function do mfhi em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
       jal readchar
@@ -901,24 +901,9 @@ main:
       la $t9, s_function_mflo #coloca o function do subu em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      jal readchar
-      addi $t0, $t0, 1  #incrementa contador
-      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
-      jal readchar #le caracter
-      jal pegaregistrador #função que pega registrador
-      jal readchar
-      addi $t0, $t0, 1  #incrementa contador
-      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
-      jal readchar #le caracter
-      jal pegaregistrador #função que pega registrador
+      la $s1, s_zero_0_em_bin
+      la $s2, s_zero_0_em_bin
+      la $t9, s_function_mflo #coloca o function do mflo em s5
       j concatenate      
 ##########################################################################################      
     pegaregistrador:
