@@ -1,3 +1,2 @@
-.data
 .text
-addi $t0, $t1, 250
+sll $t0, $t1, 12

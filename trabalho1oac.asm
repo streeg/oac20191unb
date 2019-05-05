@@ -89,38 +89,38 @@ s_tohexC: .asciiz "C"
 s_tohexD: .asciiz "D"
 s_tohexE: .asciiz "E"
 s_tohexF: .asciiz "F"
-s_zero: .asciiz "00000"
-s_at:   .asciiz "00001"
-s_v0:   .asciiz "00010"
-s_v1:   .asciiz "00011"
-s_a0:   .asciiz "00100"
-s_a1:   .asciiz "00101"
-s_a2:   .asciiz "00110"
-s_a3:   .asciiz "00111"
-s_t0:   .asciiz "01000"
-s_t1:   .asciiz "01001"
-s_t2:   .asciiz "01010"
-s_t3:   .asciiz "01011"
-s_t4:   .asciiz "01100"
-s_t5:   .asciiz "01101"
-s_t6:   .asciiz "01110"
-s_t7:   .asciiz "01111"
-s_s0:   .asciiz "10000"
-s_s1:   .asciiz "10001"
-s_s2:   .asciiz "10010"
-s_s3:   .asciiz "10011"
-s_s4:   .asciiz "10100"
-s_s5:   .asciiz "10101"
-s_s6:   .asciiz "10110"
-s_s7:   .asciiz "10111"
-s_t8:   .asciiz "11000"
-s_t9:   .asciiz "11001"
-s_k0:   .asciiz "11010"
-s_k1:   .asciiz "11011"
-s_gp:   .asciiz "11100"
-s_sp:   .asciiz "11101"
-s_fp:   .asciiz "11110"
-s_ra:   .asciiz "11111"
+s_zero_0_em_bin: .asciiz "00000"
+s_at_1_em_bin:   .asciiz "00001"
+s_v0_2_em_bin:   .asciiz "00010"
+s_v1_3_em_bin:   .asciiz "00011"
+s_a0_4_em_bin:   .asciiz "00100"
+s_a1_5_em_bin:   .asciiz "00101"
+s_a2_6_em_bin:   .asciiz "00110"
+s_a3_7_em_bin_6_em_bin:   .asciiz "00111"
+s_t0_8_em_bin:   .asciiz "01000"
+s_t1_9_em_bin:   .asciiz "01001"
+s_t2_10_em_bin:   .asciiz "01010"
+s_t3_11_em_bin:   .asciiz "01011"
+s_t4_12_em_bin:   .asciiz "01100"
+s_t5_13_em_bin:   .asciiz "01101"
+s_t6_14_em_bin:   .asciiz "01110"
+s_t7_15_em_bin:   .asciiz "01111"
+s_s0_16_em_bin:   .asciiz "10000"
+s_s1_17_em_bin:   .asciiz "10001"
+s_s2_18_em_bin:   .asciiz "10010"
+s_s3_19_em_bin:   .asciiz "10011"
+s_s4_20_em_bin:   .asciiz "10100"
+s_s5_21_em_bin:   .asciiz "10101"
+s_s6_22_em_bin:   .asciiz "10110"
+s_s7_23_em_bin:   .asciiz "10111"
+s_t8_24_em_bin:   .asciiz "11000"
+s_t9_25_em_bin:   .asciiz "11001"
+s_k0_26_em_bin:   .asciiz "11010"
+s_k1_27_em_bin:   .asciiz "11011"
+s_gp_28_em_bin:   .asciiz "11100"
+s_sp_29_em_bin:   .asciiz "11101"
+s_fp_30_em_bin:   .asciiz "11110"
+s_ra_31_em_bin:   .asciiz "11111"
 s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav: .asciiz "000000"
 s_opcode_lw: .asciiz "100011"
 s_opcode_sw: .asciiz "101011"
@@ -718,8 +718,8 @@ main:
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
       la $s4, s_shamttipor #coloca shamt em tipos r em s4
       la $t9, s_function_jr #coloca o function do add em t9
-      la $s1, s_zero
-      la $s2, s_zero
+      la $s1, s_zero_0_em_bin
+      la $s2, s_zero_0_em_bin
       jal pegaregistrador #função que pega registrador
       j concatenate              
 #########################################################################
@@ -729,32 +729,31 @@ main:
       beq $v0, 116, i_slt #se o proximo caracter não for um 't', vai pra slt
       bne $v0, 108, undefined
       jal readchar
-      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida
       jal readchar  #le caracter
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
-      la $s4, s_shamttipor #coloca shamt em tipos r em s4
-      la $t9, s_function_sll #coloca o function do subu em s5
+      la $t9, s_function_sll #coloca o function do sll em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
+      la $s1, s_zero_0_em_bin
       jal readchar
-      addi $t0, $t0, 1  #incrementa contador
+      addi $t0, $t0, 2  #incrementa contador
       bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
-      jal pegaregistrador #função que pega registrador
+      jal pegaregistrador #função que pega registrado
       jal readchar
-      addi $t0, $t0, 1  #incrementa contador
       bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
-      jal readchar #le caracter
-      jal pegaregistrador #função que pega registrador
+      jal i_vetordecaracteresparadecimal
+      jal converte_pra_decimal
+      jal pega_valor_shamt
+      move $s4, $a1 #coloca shamt em s4
       j concatenate
 #########################################################################
     i_srl:
@@ -927,7 +926,7 @@ main:
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       beq $v0, 116, i_registradort  #se caracter = t, funcao que monta registrador tipo t
-      beq $v0, 115, i_registradors_sp  #se caracter = s, funcao que monta registrador tipo s/sp
+      beq $v0, 115, i_registradors_sp_29_em_bin  #se caracter = s, funcao que monta registrador tipo s/sp
       beq $v0, 97, i_registradora  #se caracter = a, funcao que monta registrador tipo a
       beq $v0, 118, i_registradorv   #se caracter = v, funcao que monta registrador tipo v
       beq $v0, 122, i_registradorzero  #se caracter = z, funcao que monta registrador tipo zero
@@ -959,13 +958,13 @@ main:
       beq $t0, 2, i_tnumero0rt
       j undefined
       i_tnumero0rd:
-      la $s3, s_t0  #coloca string t0 em s3 (rd)
+      la $s3, s_t0_8_em_bin  #coloca string t0 em s3 (rd)
       j i_tnumero0continue
       i_tnumero0rs:
-      la $s1, s_t0  #coloca string t0 em s1 (rs)
+      la $s1, s_t0_8_em_bin  #coloca string t0 em s1 (rs)
       j i_tnumero0continue
       i_tnumero0rt:
-      la $s2, s_t0  #coloca string t0 em s2 (rt)
+      la $s2, s_t0_8_em_bin  #coloca string t0 em s2 (rt)
       j i_tnumero0continue
     i_tnumero0continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -978,13 +977,13 @@ main:
       beq $t0, 2, i_tnumero1rt
       j undefined
       i_tnumero1rd:
-      la $s3, s_t1  #coloca string t1 em s3 (rd)
+      la $s3, s_t1_9_em_bin  #coloca string t1 em s3 (rd)
       j i_tnumero1continue
       i_tnumero1rs:
-      la $s1, s_t1  #coloca string t1 em s3 (rs)
+      la $s1, s_t1_9_em_bin  #coloca string t1 em s3 (rs)
       j i_tnumero1continue
       i_tnumero1rt:
-      la $s2, s_t1  #coloca string t1 em s3 (rt)
+      la $s2, s_t1_9_em_bin  #coloca string t1 em s3 (rt)
       j i_tnumero1continue
     i_tnumero1continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -998,13 +997,13 @@ main:
       beq $t0, 2, i_tnumero2rt
       j undefined
       i_tnumero2rd:
-      la $s3, s_t2  #coloca string t2 em s3 (rd)
+      la $s3, s_t2_10_em_bin  #coloca string t2 em s3 (rd)
       j i_tnumero2continue
       i_tnumero2rs:
-      la $s1, s_t2  #coloca string t2 em s3 (rs)
+      la $s1, s_t2_10_em_bin  #coloca string t2 em s3 (rs)
       j i_tnumero2continue
       i_tnumero2rt:
-      la $s2, s_t2  #coloca string t2 em s3 (rt)
+      la $s2, s_t2_10_em_bin  #coloca string t2 em s3 (rt)
       j i_tnumero2continue
     i_tnumero2continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1018,13 +1017,13 @@ main:
       beq $t0, 2, i_tnumero3rt
       j undefined
       i_tnumero3rd:
-      la $s3, s_t3  #coloca string t3 em s3 (rd)
+      la $s3, s_t3_11_em_bin  #coloca string t3 em s3 (rd)
       j i_tnumero3continue
       i_tnumero3rs:
-      la $s1, s_t3  #coloca string t3 em s3 (rs)
+      la $s1, s_t3_11_em_bin  #coloca string t3 em s3 (rs)
       j i_tnumero3continue
       i_tnumero3rt:
-      la $s2, s_t3  #coloca string t3 em s3 (rt)
+      la $s2, s_t3_11_em_bin  #coloca string t3 em s3 (rt)
       j i_tnumero3continue
     i_tnumero3continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1038,13 +1037,13 @@ main:
       beq $t0, 2, i_tnumero4rt
       j undefined
       i_tnumero4rd:
-      la $s3, s_t4  #coloca string t4 em s3 (rd)
+      la $s3, s_t4_12_em_bin  #coloca string t4 em s3 (rd)
       j i_tnumero4continue
       i_tnumero4rs:
-      la $s1, s_t4  #coloca string t4 em s1 (rs)
+      la $s1, s_t4_12_em_bin  #coloca string t4 em s1 (rs)
       j i_tnumero4continue
       i_tnumero4rt:
-      la $s2, s_t4  #coloca string t4 em s2 (rt)
+      la $s2, s_t4_12_em_bin  #coloca string t4 em s2 (rt)
       j i_tnumero4continue
     i_tnumero4continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1058,13 +1057,13 @@ main:
       beq $t0, 2, i_tnumero5rt
       j undefined
       i_tnumero5rd:
-      la $s3, s_t5  #coloca string t5 em s3 (rd)
+      la $s3, s_t5_13_em_bin  #coloca string t5 em s3 (rd)
       j i_tnumero5continue
       i_tnumero5rs:
-      la $s1, s_t5  #coloca string t5 em s1 (rs)
+      la $s1, s_t5_13_em_bin  #coloca string t5 em s1 (rs)
       j i_tnumero5continue
       i_tnumero5rt:
-      la $s2, s_t5  #coloca string t5 em s2 (rt)
+      la $s2, s_t5_13_em_bin  #coloca string t5 em s2 (rt)
       j i_tnumero5continue
     i_tnumero5continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1078,13 +1077,13 @@ main:
       beq $t0, 2, i_tnumero6rt
       j undefined
       i_tnumero6rd:
-      la $s3, s_t6  #coloca string t6 em s3 (rd)
+      la $s3, s_t6_14_em_bin  #coloca string t6 em s3 (rd)
       j i_tnumero6continue
       i_tnumero6rs:
-      la $s1, s_t6  #coloca string t6 em s1 (rs)
+      la $s1, s_t6_14_em_bin  #coloca string t6 em s1 (rs)
       j i_tnumero6continue
       i_tnumero6rt:
-      la $s2, s_t6  #coloca string t6 em s2 (rt)
+      la $s2, s_t6_14_em_bin  #coloca string t6 em s2 (rt)
       j i_tnumero6continue
     i_tnumero6continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1098,13 +1097,13 @@ main:
       beq $t0, 2, i_tnumero7rt
       j undefined
       i_tnumero7rd:
-      la $s3, s_t7  #coloca string t7 em s3 (rd)
+      la $s3, s_t7_15_em_bin  #coloca string t7 em s3 (rd)
       j i_tnumero7continue
       i_tnumero7rs:
-      la $s1, s_t7  #coloca string t7 em s1 (rs)
+      la $s1, s_t7_15_em_bin  #coloca string t7 em s1 (rs)
       j i_tnumero7continue
       i_tnumero7rt:
-      la $s2, s_t7  #coloca string t7 em s2 (rt)
+      la $s2, s_t7_15_em_bin  #coloca string t7 em s2 (rt)
       j i_tnumero7continue
     i_tnumero7continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1118,13 +1117,13 @@ main:
       beq $t0, 2, i_tnumero8rt
       j undefined
       i_tnumero8rd:
-      la $s3, s_t8  #coloca string t8 em s3 (rd)
+      la $s3, s_t8_24_em_bin  #coloca string t8 em s3 (rd)
       j i_tnumero8continue
       i_tnumero8rs:
-      la $s1, s_t8  #coloca string t8 em s1 (rs)
+      la $s1, s_t8_24_em_bin  #coloca string t8 em s1 (rs)
       j i_tnumero8continue
       i_tnumero8rt:
-      la $s2, s_t8  #coloca string t8 em s2 (rt)
+      la $s2, s_t8_24_em_bin  #coloca string t8 em s2 (rt)
       j i_tnumero8continue
     i_tnumero8continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1138,13 +1137,13 @@ main:
       beq $t0, 2, i_tnumero9rt
       j undefined
       i_tnumero9rd:
-      la $s3, s_t9  #coloca string t9 em s3 (rd)
+      la $s3, s_t9_25_em_bin  #coloca string t9 em s3 (rd)
       j i_tnumero9continue
       i_tnumero9rs:
-      la $s1, s_t9  #coloca string t9 em s1 (rs)
+      la $s1, s_t9_25_em_bin  #coloca string t9 em s1 (rs)
       j i_tnumero9continue
       i_tnumero9rt:
-      la $s2, s_t9  #coloca string t9 em s2 (rt)
+      la $s2, s_t9_25_em_bin  #coloca string t9 em s2 (rt)
       j i_tnumero9continue
     i_tnumero9continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1152,7 +1151,7 @@ main:
       jr $ra
 
 
-    i_registradors_sp:
+    i_registradors_sp_29_em_bin:
       jal readchar #le caracter
       beq $v0, 112, i_registradorsp
       beq $v0, 48, i_snumero0  #se s0, funcao que coloca string s0 no endereço s3 (rd)
@@ -1172,13 +1171,13 @@ main:
       beq $t0, 2, i_snumero0rt
       j undefined
       i_snumero0rd:
-      la $s3, s_s0  #coloca string s0 em s3 (rd)
+      la $s3, s_s0_16_em_bin  #coloca string s0 em s3 (rd)
       j i_snumero0continue
       i_snumero0rs:
-      la $s1, s_s0  #coloca string s0 em s1 (rs)
+      la $s1, s_s0_16_em_bin  #coloca string s0 em s1 (rs)
       j i_snumero0continue
       i_snumero0rt:
-      la $s2, s_s0  #coloca string s0 em s2 (rt)
+      la $s2, s_s0_16_em_bin  #coloca string s0 em s2 (rt)
       j i_snumero0continue
     i_snumero0continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1192,13 +1191,13 @@ main:
       beq $t0, 2, i_snumero1rt
       j undefined
       i_snumero1rd:
-      la $s3, s_s1  #coloca string s1 em s3 (rd)
+      la $s3, s_s1_17_em_bin  #coloca string s1 em s3 (rd)
       j i_snumero1continue
       i_snumero1rs:
-      la $s1, s_s1  #coloca string s1 em s1 (rs)
+      la $s1, s_s1_17_em_bin  #coloca string s1 em s1 (rs)
       j i_snumero1continue
       i_snumero1rt:
-      la $s2, s_s1  #coloca string s1 em s2 (rt)
+      la $s2, s_s1_17_em_bin  #coloca string s1 em s2 (rt)
       j i_snumero1continue
     i_snumero1continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1212,13 +1211,13 @@ main:
       beq $t0, 2, i_snumero2rt
       j undefined
       i_snumero2rd:
-      la $s3, s_s2  #coloca string s2 em s3 (rd)
+      la $s3, s_s2_18_em_bin  #coloca string s2 em s3 (rd)
       j i_snumero2continue
       i_snumero2rs:
-      la $s1, s_s2  #coloca string s2 em s1 (rs)
+      la $s1, s_s2_18_em_bin  #coloca string s2 em s1 (rs)
       j i_snumero2continue
       i_snumero2rt:
-      la $s2, s_s2  #coloca string s2 em s2 (rt)
+      la $s2, s_s2_18_em_bin  #coloca string s2 em s2 (rt)
       j i_snumero2continue
     i_snumero2continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1232,13 +1231,13 @@ main:
       beq $t0, 2, i_snumero3rt
       j undefined
       i_snumero3rd:
-      la $s3, s_s3  #coloca string s3 em s3 (rd)
+      la $s3, s_s3_19_em_bin  #coloca string s3 em s3 (rd)
       j i_snumero3continue
       i_snumero3rs:
-      la $s1, s_s3  #coloca string s3 em s1 (rs)
+      la $s1, s_s3_19_em_bin  #coloca string s3 em s1 (rs)
       j i_snumero3continue
       i_snumero3rt:
-      la $s2, s_s3  #coloca string s3 em s2 (rt)
+      la $s2, s_s3_19_em_bin  #coloca string s3 em s2 (rt)
       j i_snumero3continue
     i_snumero3continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1252,13 +1251,13 @@ main:
       beq $t0, 2, i_snumero4rt
       j undefined
       i_snumero4rd:
-      la $s3, s_s4  #coloca string s4 em s3 (rd)
+      la $s3, s_s4_20_em_bin  #coloca string s4 em s3 (rd)
       j i_snumero4continue
       i_snumero4rs:
-      la $s1, s_s4  #coloca string s4 em s1 (rs)
+      la $s1, s_s4_20_em_bin  #coloca string s4 em s1 (rs)
       j i_snumero4continue
       i_snumero4rt:
-      la $s2, s_s4  #coloca string s4 em s2 (rt)
+      la $s2, s_s4_20_em_bin  #coloca string s4 em s2 (rt)
       j i_snumero4continue
     i_snumero4continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1272,13 +1271,13 @@ main:
       beq $t0, 2, i_snumero5rt
       j undefined
       i_snumero5rd:
-      la $s3, s_s5  #coloca string s5 em s3 (rd)
+      la $s3, s_s5_21_em_bin  #coloca string s5 em s3 (rd)
       j i_snumero5continue
       i_snumero5rs:
-      la $s1, s_s5  #coloca string s5 em s1 (rs)
+      la $s1, s_s5_21_em_bin  #coloca string s5 em s1 (rs)
       j i_snumero5continue
       i_snumero5rt:
-      la $s2, s_s5  #coloca string s5 em s2 (rt)
+      la $s2, s_s5_21_em_bin  #coloca string s5 em s2 (rt)
       j i_snumero5continue
     i_snumero5continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1292,13 +1291,13 @@ main:
       beq $t0, 2, i_snumero6rt
       j undefined
       i_snumero6rd:
-      la $s3, s_s6  #coloca string s6 em s3 (rd)
+      la $s3, s_s6_22_em_bin  #coloca string s6 em s3 (rd)
       j i_snumero6continue
       i_snumero6rs:
-      la $s1, s_s6  #coloca string s6 em s1 (rs)
+      la $s1, s_s6_22_em_bin  #coloca string s6 em s1 (rs)
       j i_snumero6continue
       i_snumero6rt:
-      la $s2, s_s6  #coloca string s6 em s2 (rt)
+      la $s2, s_s6_22_em_bin  #coloca string s6 em s2 (rt)
       j i_snumero6continue
     i_snumero6continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1312,13 +1311,13 @@ main:
       beq $t0, 2, i_snumero7rt
       j undefined
       i_snumero7rd:
-      la $s3, s_s7  #coloca string s7 em s3 (rd)
+      la $s3, s_s7_23_em_bin  #coloca string s7 em s3 (rd)
       j i_snumero7continue
       i_snumero7rs:
-      la $s1, s_s7  #coloca string s7 em s1 (rs)
+      la $s1, s_s7_23_em_bin  #coloca string s7 em s1 (rs)
       j i_snumero7continue
       i_snumero7rt:
-      la $s2, s_s7  #coloca string s7 em s2 (rt)
+      la $s2, s_s7_23_em_bin  #coloca string s7 em s2 (rt)
       j i_snumero7continue
     i_snumero7continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1332,13 +1331,13 @@ main:
       beq $t0, 2, i_registradorsprt
       j undefined
       i_registradorsprd:
-      la $s3, s_sp  #coloca string sp em s3 (rd)
+      la $s3, s_sp_29_em_bin  #coloca string sp em s3 (rd)
       j i_registradorspcontinue
       i_registradorsprs:
-      la $s1, s_sp  #coloca string sp em s1 (rs)
+      la $s1, s_sp_29_em_bin  #coloca string sp em s1 (rs)
       j i_registradorspcontinue
       i_registradorsprt:
-      la $s2, s_sp  #coloca string sp em s2 (rt)
+      la $s2, s_sp_29_em_bin  #coloca string sp em s2 (rt)
       j i_registradorspcontinue
     i_registradorspcontinue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1359,13 +1358,13 @@ main:
       beq $t0, 2, i_anumero0rt
       j undefined
       i_anumero0rd:
-      la $s3, s_a0  #coloca string a0 em s3 (rd)
+      la $s3, s_a0_4_em_bin  #coloca string a0 em s3 (rd)
       j i_anumero0continue
       i_anumero0rs:
-      la $s1, s_a0  #coloca string a0 em s1 (rs)
+      la $s1, s_a0_4_em_bin  #coloca string a0 em s1 (rs)
       j i_anumero0continue
       i_anumero0rt:
-      la $s2, s_a0  #coloca string a0 em s2 (rt)
+      la $s2, s_a0_4_em_bin  #coloca string a0 em s2 (rt)
       j i_anumero0continue
     i_anumero0continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1378,13 +1377,13 @@ main:
       beq $t0, 2, i_anumero1rt
       j undefined
       i_anumero1rd:
-      la $s3, s_a1  #coloca string a1 em s3 (rd)
+      la $s3, s_a1_5_em_bin  #coloca string a1 em s3 (rd)
       j i_anumero1continue
       i_anumero1rs:
-      la $s1, s_a1  #coloca string a1 em s1 (rs)
+      la $s1, s_a1_5_em_bin  #coloca string a1 em s1 (rs)
       j i_anumero1continue
       i_anumero1rt:
-      la $s2, s_a1  #coloca string a1 em s2 (rt)
+      la $s2, s_a1_5_em_bin  #coloca string a1 em s2 (rt)
       j i_anumero1continue
     i_anumero1continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1397,13 +1396,13 @@ main:
       beq $t0, 2, i_anumero2rt
       j undefined
       i_anumero2rd:
-      la $s3, s_a2  #coloca string a2 em s3 (rd)
+      la $s3, s_a2_6_em_bin  #coloca string a2 em s3 (rd)
       j i_anumero2continue
       i_anumero2rs:
-      la $s1, s_a2  #coloca string a2 em s1 (rs)
+      la $s1, s_a2_6_em_bin  #coloca string a2 em s1 (rs)
       j i_anumero2continue
       i_anumero2rt:
-      la $s2, s_a2  #coloca string a2 em s2 (rt)
+      la $s2, s_a2_6_em_bin  #coloca string a2 em s2 (rt)
       j i_anumero2continue
     i_anumero2continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1416,13 +1415,13 @@ main:
       beq $t0, 2, i_anumero3rt
       j undefined
       i_anumero3rd:
-      la $s3, s_a3  #coloca string a3 em s3 (rd)
+      la $s3, s_a3_7_em_bin_6_em_bin  #coloca string a3 em s3 (rd)
       j i_anumero3continue
       i_anumero3rs:
-      la $s1, s_a3  #coloca string a3 em s1 (rs)
+      la $s1, s_a3_7_em_bin_6_em_bin  #coloca string a3 em s1 (rs)
       j i_anumero3continue
       i_anumero3rt:
-      la $s2, s_a3  #coloca string a3 em s2 (rt)
+      la $s2, s_a3_7_em_bin_6_em_bin  #coloca string a3 em s2 (rt)
       j i_anumero3continue
     i_anumero3continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1441,13 +1440,13 @@ main:
       beq $t0, 2, i_vnumero0rt
       j undefined
       i_vnumero0rd:
-      la $s3, s_v0  #coloca string v0 em s3 (rd)
+      la $s3, s_v0_2_em_bin  #coloca string v0 em s3 (rd)
       j i_vnumero0continue
       i_vnumero0rs:
-      la $s1, s_v0  #coloca string v0 em s1 (rs)
+      la $s1, s_v0_2_em_bin  #coloca string v0 em s1 (rs)
       j i_vnumero0continue
       i_vnumero0rt:
-      la $s2, s_v0  #coloca string v0 em s2 (rt)
+      la $s2, s_v0_2_em_bin  #coloca string v0 em s2 (rt)
       j i_vnumero0continue
     i_vnumero0continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1460,13 +1459,13 @@ main:
       beq $t0, 2, i_vnumero1rt
       j undefined
       i_vnumero1rd:
-      la $s3, s_v1  #coloca string v1 em s3 (rd)
+      la $s3, s_v1_3_em_bin  #coloca string v1 em s3 (rd)
       j i_vnumero1continue
       i_vnumero1rs:
-      la $s1, s_v1  #coloca string v1 em s1 (rs)
+      la $s1, s_v1_3_em_bin  #coloca string v1 em s1 (rs)
       j i_vnumero1continue
       i_vnumero1rt:
-      la $s2, s_v1  #coloca string v1 em s2 (rt)
+      la $s2, s_v1_3_em_bin  #coloca string v1 em s2 (rt)
       j i_vnumero1continue
     i_vnumero1continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1488,13 +1487,13 @@ main:
       beq $t0, 2, i_znumero1rt
       j undefined
       i_znumero1rd:
-      la $s3, s_zero
+      la $s3, s_zero_0_em_bin
       j i_znumero1continue
     i_znumero1rs:
-      la $s1, s_zero
+      la $s1, s_zero_0_em_bin
       j i_znumero1continue
       i_znumero1rt:
-      la $s2, s_zero
+      la $s2, s_zero_0_em_bin
       j i_znumero1continue
       i_znumero1continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1513,13 +1512,13 @@ main:
       beq $t0, 2, i_knumero0rt
       j undefined
       i_knumero0rd:
-      la $s3, s_k0  #coloca string k0 em s3 (rd)
+      la $s3, s_k0_26_em_bin  #coloca string k0 em s3 (rd)
       j i_knumero0continue
       i_knumero0rs:
-      la $s1, s_k0  #coloca string k0 em s3 (rd)
+      la $s1, s_k0_26_em_bin  #coloca string k0 em s3 (rd)
       j i_knumero0continue
       i_knumero0rt:
-      la $s2, s_k0  #coloca string k0 em s3 (rd)
+      la $s2, s_k0_26_em_bin  #coloca string k0 em s3 (rd)
       j i_knumero0continue
       i_knumero0continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1531,13 +1530,13 @@ main:
       beq $t0, 2, i_knumero1rt
       j undefined
       i_knumero1rd:
-      la $s3, s_k1  #coloca string k1 em s3 (rd)
+      la $s3, s_k1_27_em_bin  #coloca string k1 em s3 (rd)
       j i_knumero1continue
       i_knumero1rs:
-    la $s1, s_k1  #coloca string k1 em s3 (rd)
+    la $s1, s_k1_27_em_bin  #coloca string k1 em s3 (rd)
       j i_knumero1continue
       i_knumero1rt:
-      la $s2, s_k1  #coloca string k1 em s3 (rd)
+      la $s2, s_k1_27_em_bin  #coloca string k1 em s3 (rd)
       j i_knumero1continue
       i_knumero1continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1555,13 +1554,13 @@ main:
       beq $t0, 2, i_gpnumero0rt
       j undefined
       i_gpnumero0rd:
-      la $s3, s_gp  #coloca string gp em s3 (rd)
+      la $s3, s_gp_28_em_bin  #coloca string gp em s3 (rd)
       j i_gpnumero0continue
       i_gpnumero0rs:
-      la $s1, s_gp  #coloca string gp em s3 (rd)
+      la $s1, s_gp_28_em_bin  #coloca string gp em s3 (rd)
       j i_gpnumero0continue
       i_gpnumero0rt:
-      la $s2, s_gp  #coloca string gp em s3 (rd)
+      la $s2, s_gp_28_em_bin  #coloca string gp em s3 (rd)
       j i_gpnumero0continue
       i_gpnumero0continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1579,13 +1578,13 @@ main:
       beq $t0, 2, i_fpnumero0rt
       j undefined
       i_fpnumero0rd:
-      la $s3, s_fp  #coloca string fp em s3 (rd)
+      la $s3, s_fp_30_em_bin  #coloca string fp em s3 (rd)
       j i_fpnumero0continue
       i_fpnumero0rs:
-      la $s1, s_fp  #coloca string fp em s3 (rd)
+      la $s1, s_fp_30_em_bin  #coloca string fp em s3 (rd)
       j i_fpnumero0continue
       i_fpnumero0rt:
-      la $s2, s_fp  #coloca string fp em s3 (rd)
+      la $s2, s_fp_30_em_bin  #coloca string fp em s3 (rd)
       j i_fpnumero0continue
       i_fpnumero0continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1602,13 +1601,13 @@ main:
       beq $t0, 1, i_ranumero0rs
       beq $t0, 2, i_ranumero0rt
       i_ranumero0rd:
-      la $s3, s_fp  #coloca string ra em s3 (rd)
+      la $s3, s_fp_30_em_bin  #coloca string ra em s3 (rd)
       j i_ranumero0continue
       i_ranumero0rs:
-      la $s1, s_fp  #coloca string ra em s3 (rd)
+      la $s1, s_fp_30_em_bin  #coloca string ra em s3 (rd)
       j i_ranumero0continue
       i_ranumero0rt:
-      la $s2, s_fp  #coloca string ra em s3 (rd)
+      la $s2, s_fp_30_em_bin  #coloca string ra em s3 (rd)
       j i_ranumero0continue
       i_ranumero0continue:
       lw $ra, 0($sp)  #lê valor de ra que estava na pilha
@@ -1619,7 +1618,6 @@ main:
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       move $t0, $zero  #anda de 4 em 4
-      addi $t0, $t0, 3
       move $t2, $zero  #salva quantos numeros foram lidos
       move $t1, $zero
     vetordecaracteresparadecimalstart:
@@ -1702,6 +1700,138 @@ main:
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
+    
+pega_valor_shamt:
+   beq $a0, 0, preenche_shamt_0
+   beq $a0, 1, preenche_shamt_1
+   beq $a0, 2, preenche_shamt_2
+   beq $a0, 3, preenche_shamt_3
+   beq $a0, 4, preenche_shamt_4
+   beq $a0, 5, preenche_shamt_5
+   beq $a0, 6, preenche_shamt_6
+   beq $a0, 7, preenche_shamt_7
+   beq $a0, 8, preenche_shamt_8
+   beq $a0, 9, preenche_shamt_9
+   beq $a0, 10, preenche_shamt_10
+   beq $a0, 11, preenche_shamt_11
+   beq $a0, 12, preenche_shamt_12
+   beq $a0, 13, preenche_shamt_13
+   beq $a0, 14, preenche_shamt_14
+   beq $a0, 15, preenche_shamt_15
+   beq $a0, 16, preenche_shamt_16
+   beq $a0, 17, preenche_shamt_17
+   beq $a0, 18, preenche_shamt_18
+   beq $a0, 19, preenche_shamt_19
+   beq $a0, 20, preenche_shamt_20
+   beq $a0, 21, preenche_shamt_21
+   beq $a0, 22, preenche_shamt_22
+   beq $a0, 23, preenche_shamt_23
+   beq $a0, 24, preenche_shamt_24
+   beq $a0, 25, preenche_shamt_25
+   beq $a0, 26, preenche_shamt_26
+   beq $a0, 27, preenche_shamt_27
+   beq $a0, 28, preenche_shamt_28
+   beq $a0, 29, preenche_shamt_29
+   beq $a0, 30, preenche_shamt_30
+   beq $a0, 31, preenche_shamt_31
+   
+preenche_shamt_0:
+   la $a1, s_zero_0_em_bin
+   jr $ra
+preenche_shamt_1:
+   la $a1, s_at_1_em_bin
+   jr $ra
+preenche_shamt_2:
+   la $a1, s_v0_2_em_bin
+   jr $ra
+preenche_shamt_3:
+   la $a1, s_v1_3_em_bin
+   jr $ra
+preenche_shamt_4:
+   la $a1, s_a0_4_em_bin
+   jr $ra
+preenche_shamt_5:
+   la $a1, s_a1_5_em_bin
+   jr $ra
+preenche_shamt_6:
+   la $a1, s_a2_6_em_bin
+   jr $ra
+preenche_shamt_7:
+   la $a1, s_a3_7_em_bin_6_em_bin
+   jr $ra
+preenche_shamt_8:
+   la $a1, s_t0_8_em_bin
+   jr $ra
+preenche_shamt_9:
+   la $a1, s_t1_9_em_bin
+   jr $ra
+preenche_shamt_10:
+   la $a1, s_t2_10_em_bin
+   jr $ra
+preenche_shamt_11:
+   la $a1, s_t3_11_em_bin
+   jr $ra
+preenche_shamt_12:
+   la $a1, s_t4_12_em_bin
+   jr $ra
+preenche_shamt_13:
+   la $a1, s_t5_13_em_bin
+   jr $ra
+preenche_shamt_14:
+   la $a1, s_t6_14_em_bin
+   jr $ra
+preenche_shamt_15:
+   la $a1, s_t7_15_em_bin
+   jr $ra
+preenche_shamt_16:
+   la $a1, s_s0_16_em_bin
+   jr $ra
+preenche_shamt_17:
+   la $a1, s_s1_17_em_bin
+   jr $ra
+preenche_shamt_18:
+   la $a1, s_s2_18_em_bin
+   jr $ra
+preenche_shamt_19:
+   la $a1, s_s3_19_em_bin
+   jr $ra
+preenche_shamt_20:
+   la $a1, s_s4_20_em_bin
+   jr $ra
+preenche_shamt_21:
+   la $a1, s_s5_21_em_bin
+   jr $ra
+preenche_shamt_22:
+   la $a1, s_s6_22_em_bin
+   jr $ra
+preenche_shamt_23:
+   la $a1, s_s7_23_em_bin
+   jr $ra
+preenche_shamt_24:
+   la $a1, s_t8_24_em_bin
+   jr $ra
+preenche_shamt_25:
+   la $a1, s_t9_25_em_bin
+   jr $ra
+preenche_shamt_26:
+   la $a1, s_k0_26_em_bin
+   jr $ra
+preenche_shamt_27:
+   la $a1, s_k1_27_em_bin
+   jr $ra
+preenche_shamt_28:
+   la $a1, s_gp_28_em_bin
+   jr $ra
+preenche_shamt_29:
+   la $a1, s_sp_29_em_bin
+   jr $ra
+preenche_shamt_30:
+   la $a1, s_fp_30_em_bin
+   jr $ra
+preenche_shamt_31:
+   la $a1, s_ra_31_em_bin
+   jr $ra
+   
 
 converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de parada. resultado armazenado em a0.
   #t2 tem contador de numeros em buffer
@@ -1711,7 +1841,6 @@ converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de
    li $t3,0
    li $t4,9
    move $t0, $zero
-   addi $t0, $t0, 3 
    lw $t1, buffer_caracter_decimal($t0)        #Get first digit of string
    li $a0, 0            #accumulator
    move $a2, $t1         #$a2=$t1 goto checkdigit
@@ -1735,7 +1864,6 @@ buc1:
 salva_valor_decimal:
    
   la $t0, buffer_decimal_salvo
-  addi $t0, $t0, 3
   sw $a0, ($t0)
   j gobackcaller
 
@@ -1757,7 +1885,7 @@ concatenate:
   nop
 
 # Concatenate second string on result buffer
-  la $a0, ($s3)
+  la $a0, ($s1)
   or $a1, $v0, $zero
   jal strcopier
   nop
@@ -1774,7 +1902,7 @@ concatenate2:
   nop
 
 # Concatenate second string on result buffer
-  la $a0, ($s1)
+  la $a0, ($s2)
   or $a1, $v0, $zero
   jal strcopier
   nop
@@ -1787,7 +1915,7 @@ concatenate3:
   nop
 
 # Concatenate second string on result buffer
-  la $a0, ($s2)
+  la $a0, ($s3)
   or $a1, $v0, $zero
   jal strcopier
   nop
@@ -1844,8 +1972,8 @@ finish_concatenate:
   la $t0, s_converted
   add $a0, $t0, $zero
   syscall
-  nop
-  j convertehexa
+  li $v0, 10
+  syscall
 #########################################################################
 concatenateimediato:
 move $t0, $zero
