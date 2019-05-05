@@ -25,24 +25,24 @@
 #A listagem de instruções a serem compiladas e montadas pela aplicação desenvolvida são:
 #
 # lw $t0, OFFSET($s3)
-# add/sub/and/or/nor/xor $t0, $s2, $t0
+# add/sub/and/or/nor/xor $t0, $s2, $t0 (ok)
 # sw $t0, OFFSET($s3)
 # j LABEL
-# jr $t0
+# jr $t0 (ok)
 # jal LABEL
 # beq/bne $t1, $zero, 0xXXXXX
-# slt $t1, $t2, $t3
+# slt $t1, $t2, $t3 (ok)
 # lui $t1, 0xXXXX
-# addu/subu $t1, $t2, $t3
-# sll/srl $t2, $t3, 10
+# addu/subu $t1, $t2, $t3 (ok)
+# sll/srl $t2, $t3, 10 (ok)
 # addi/andi/ori/xori $t2, $t3, -10
-# mult $t1, $t2
-# div $t1, $t2
+# mult $t1, $t2 (ok)
+# div $t1, $t2 (ok)
 # li $t1, XX (incluindo na forma de pseudoinstrução)
-# mfhi/mflo $t1
+# mfhi/mflo $t1 (ok)
 # bgez $t1, LABEL
-# clo $t1, $t2
-# srav $t1, $t2, $t3
+# clo $t1, $t2 (ok)
+# srav $t1, $t2, $t3 (ok)
 #
 #------------------------------------------------------------------------------------------------------------------------------------
 #        /*************  Instructions template  **********
