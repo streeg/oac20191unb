@@ -134,6 +134,7 @@ s_opcode_andi: .asciiz "001100"
 s_opcode_ori:   .asciiz "001101"
 s_opcode_xori:  .asciiz "001110"
 s_opcode_bgez:  .asciiz "000001"
+s_opcode_clo:   .asciiz "011100"
 s_shamttipor: .asciiz "00000"
 s_function_add: .asciiz "100000"
 s_function_sub: .asciiz "100010"
@@ -152,6 +153,7 @@ s_function_div:  .asciiz "011010"
 s_function_mfhi:  .asciiz "010000"
 s_function_mflo:  .asciiz "010010"
 s_function_srav:  .asciiz "000111"
+s_function_clo:   .asciiz "100001"
 #instruções tipo i e j não tem function
 #
 #concatenacao de string
@@ -245,7 +247,8 @@ main:
     beq $v0, 111, i_or    #se caracter for um 'o' vai para função de escrita do or, ori
     beq $v0, 110, i_nor  #se caracter for um 'n' vai para funcao de escrita do nor
     beq $v0, 106, i_j  #se caracter for um 'j' vai para funcao de verificao comecando por 'j'
-    beq $v0, 109, i_m  #se caracter for um 'm' vai para funcao de verificao comecando por 'm'   
+    beq $v0, 109, i_m  #se caracter for um 'm' vai para funcao de verificao comecando por 'm' 
+    beq $v0, 99, i_clo  
 #########################################################################
   i_a:
     jal readchar  #le caracter
@@ -330,6 +333,33 @@ main:
       syscall            # write to file
       beq $v0, 10, parser #se o proximo caracter for 'enter', volta pra função leitura de caracter até achar próxima instrução.
       j parser
+##################################################################################################################################################
+    i_clo:
+      move $t0, $zero #contador de registrador (0 registrador rd)
+      jal readchar  #le caracter
+      bne $v0, 108, undefined  #se o proximo caracter não for 'l', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 111, undefined  #se o proximo caracter não for 'o', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      la $s0, s_opcode_clo  #coloca opcode add em s0
+      la $s4, s_shamttipor #coloca shamt em tipos r em s4
+      la $t9, s_function_clo #coloca o function do add em t9
+      jal pegaregistrador #função que pega registrador
+      jal readchar
+      addi $t0, $t0, 1  #incrementa contador
+      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
+      jal readchar  #le caracter
+      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
+      jal readchar #le caracter
+      jal pegaregistrador #função que pega registrador
+      la $s2, s_zero_0_em_bin
+      j concatenate
 ##################################################################################################################################################
     i_add:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -698,7 +728,6 @@ main:
     i_jr:
       move $t0, $zero #contador de registrador (0 registrador rd)
       addi $t0, $t0, 1  #incrementa contador
-      addi $t0, $t0, 1  #incrementa contador
       jal readchar  #le caracter
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
       jal readchar  #le caracter
@@ -707,7 +736,7 @@ main:
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
       la $s4, s_shamttipor #coloca shamt em tipos r em s4
       la $t9, s_function_jr #coloca o function do add em t9
-      la $s1, s_zero_0_em_bin
+      la $s3, s_zero_0_em_bin
       la $s2, s_zero_0_em_bin
       jal pegaregistrador #função que pega registrador
       j concatenate              
@@ -715,7 +744,7 @@ main:
     i_sll:
       move $t0, $zero #contador de registrador (0 registrador rd)
       jal readchar
-      beq $v0, 116, i_slt #se o proximo caracter não for um 't', vai pra slt
+      beq $v0, 116, i_slt #se o proximo caracter for um 't', vai pra slt
       bne $v0, 108, undefined
       jal readchar
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida
@@ -780,6 +809,7 @@ main:
 #########################################################################
     i_slt:
       move $t0, $zero #contador de registrador (0 registrador rd)
+      jal readchar
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
@@ -2259,11 +2289,11 @@ move $t4, $0
 move $t5, $0
 move $t6, $0
 
-addi $t6, $t6, -1
+addi $t6, $t6, 0
 sw $t8, bufferarmazenanibble($t6)
 
 la $t3, bufferarmazenanibble
-lw $t2, -1($t3)
+lw $t2, 0($t3)
 
 t1_nible:
 

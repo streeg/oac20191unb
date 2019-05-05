@@ -1,2 +1,2 @@
 .text
-mult $s1, $t5
+clo $t1, $t8
