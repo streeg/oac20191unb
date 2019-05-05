@@ -1,2 +1,2 @@
 .text
-mflo $t4
+mfhi $t4

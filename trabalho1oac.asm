@@ -868,24 +868,8 @@ main:
       la $t9, s_function_mfhi #coloca o function do mfhi em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      jal readchar
-      addi $t0, $t0, 1  #incrementa contador
-      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
-      jal readchar #le caracter
-      jal pegaregistrador #função que pega registrador
-      jal readchar
-      addi $t0, $t0, 1  #incrementa contador
-      bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
-      jal readchar #le caracter
-      jal pegaregistrador #função que pega registrador
+      la $s1, s_zero_0_em_bin
+      la $s2, s_zero_0_em_bin
       j concatenate
 #########################################################################
     i_mflo:
