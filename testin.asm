@@ -1,2 +1,2 @@
 .text
-sll $t0, $t1, 12
+srl $t0, $t1, 12

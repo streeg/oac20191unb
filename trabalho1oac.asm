@@ -762,33 +762,32 @@ main:
       beq $v0, 97, i_srav #se o proximo caracter não for um 't', vai pra slt
       bne $v0, 108, undefined
       jal readchar
-      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
+      bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida
       jal readchar  #le caracter
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       la $s0, s_opcode_add_sub_and_or_nor_xor_jr_slt_addu_subu_sll_srl_mult_div_mfhi_mflo_srav  #coloca opcode add em s0
-      la $s4, s_shamttipor #coloca shamt em tipos r em s4
-      la $t9, s_function_srl #coloca o function do subu em s5
+      la $t9, s_function_srl #coloca o function do srl em s5
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
+      la $s1, s_zero_0_em_bin
       jal readchar
-      addi $t0, $t0, 1  #incrementa contador
+      addi $t0, $t0, 2  #incrementa contador
       bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
-      jal pegaregistrador #função que pega registrador
+      jal pegaregistrador #função que pega registrado
       jal readchar
-      addi $t0, $t0, 1  #incrementa contador
       bne $v0, 44, undefined #se o proximo caracter não for um ',', instrução não definida.
       jal readchar  #le caracter
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
-      jal readchar  #le caracter
-      bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
-      jal readchar #le caracter
-      jal pegaregistrador #função que pega registrador
-      j concatenate      
+      jal i_vetordecaracteresparadecimal
+      jal converte_pra_decimal
+      jal pega_valor_shamt
+      move $s4, $a1 #coloca shamt em s4
+      j concatenate
 #########################################################################
     i_slt:
       move $t0, $zero #contador de registrador (0 registrador rd)
