@@ -1725,61 +1725,61 @@ escrevearquivodata:
 
    digito_0:
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_1:
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_2:
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_3:
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_4:
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_5:
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_6:
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_7: 
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_8:
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_9:
     addi $t1, $v0, -48
-    sw $t1, buffer_caracter_decimal($t0)
+    sb $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
@@ -1925,14 +1925,14 @@ converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de
    li $t4,9
    move $t0, $zero
    addi $t0, $t0, 1
-   lw $t1, buffer_caracter_decimal($t0)        #Get first digit of string
+   lb $t1, buffer_caracter_decimal($t0)        #Get first digit of string
    li $a0, 0            #accumulator
    move $a2, $t1         #$a2=$t1 goto checkdigit
    jal checkdigit
    add $a0, $a0, $t1      #Accumulates
    addi $t0, $t0, 4      #Advance string pointer 
    addi $t2, $t2, -1
-   lw $t1, buffer_caracter_decimal($t0)        #Get next digit
+   lb $t1, buffer_caracter_decimal($t0)        #Get next digit
 
 buc1:   
    ble $t2, $zero, salva_valor_decimal #if $t1=10(linefeed) then print
@@ -1942,13 +1942,13 @@ buc1:
    add $a0, $t5, $t1      #Accumulates
    addi $t0, $t0, 4      #Advance string pointer
    addi $t2, $t2, -1 
-   lw $t1, buffer_caracter_decimal($t0)        #Get next digit 
+   lb $t1, buffer_caracter_decimal($t0)        #Get next digit 
    b buc1
 
 salva_valor_decimal:
    
   la $t0, buffer_decimal_salvo
-  sw $a0, 1($t0)
+  sb $a0, 1($t0)
   j gobackcaller
 
 checkdigit:
@@ -2321,10 +2321,10 @@ move $t5, $0
 move $t6, $0
 
 addi $t6, $t6, 1
-sw $t8, bufferarmazenanibble($t6)
+sb $t8, bufferarmazenanibble($t6)
 
 la $t3, bufferarmazenanibble
-lw $t2, 1($t3)
+lb $t2, 1($t3)
 addi $sp, $sp, -4  #prepara pilha pra receber 1 item
 sw $ra, 0($sp)     #salva o endereço de $ra em sp
 t1_nible:
