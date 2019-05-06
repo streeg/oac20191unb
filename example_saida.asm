@@ -1,30 +1,16 @@
 .data
-
-str: .asciiz "123"
-transhexa: .space 16
-transhexa2: .space 16
+a: .word 1, 2, 3
 
 .text
-move $t8, $zero
-la $t0, str
-la $t1, transhexa($zero)
-la $s0, transhexa2($zero)
-lb $t2, ($t0)
-addi $t0, $t0, 1
-add $t3, $t2, -48
-sw $t3, transhexa2($t8)
-addi $t8, $t8, 4
-lb $t2, ($t0)
-addi $t0, $t0, 1
-add $t4, $t2, -48
-sw $t4, transhexa2($t8)
-lb $t2, ($t0)
-addi $t0, $t0, 1
-add $t5, $t2, -48
-sw $t5, 8($s0)
-
-lw $t6, 0($s0)
-lw $t7, 4($s0)
-lw $t8, 8($s0)
-
-
+li $t0, 0x10010000
+lw $t1, 0($t0)
+lw $t2, 4($t0)
+lw $t3, 8($t0)
+clo $t1, $t2
+add $t1, $t2, $t3
+xor $t4, $t1, $t2
+addi $t5, $t4, 10
+xori $t6, $t5, 20
+sw $t4, 0($t0)
+sw $t5, 4($t0)
+sw $t6, 8($t0)

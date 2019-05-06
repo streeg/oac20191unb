@@ -25,24 +25,24 @@
 #A listagem de instruções a serem compiladas e montadas pela aplicação desenvolvida são:
 #
 # lw $t0, OFFSET($s3)
-# add/sub/and/or/nor/xor $t0, $s2, $t0 (ok)
+# add/sub/and/or/nor/xor $t0, $s2, $t0
 # sw $t0, OFFSET($s3)
 # j LABEL
-# jr $t0 (ok)
+# jr $t0
 # jal LABEL
 # beq/bne $t1, $zero, 0xXXXXX
-# slt $t1, $t2, $t3 (ok)
+# slt $t1, $t2, $t3
 # lui $t1, 0xXXXX
-# addu/subu $t1, $t2, $t3 (ok)
-# sll/srl $t2, $t3, 10 (ok)
+# addu/subu $t1, $t2, $t3
+# sll/srl $t2, $t3, 10
 # addi/andi/ori/xori $t2, $t3, -10
-# mult $t1, $t2 (ok)
-# div $t1, $t2 (ok)
+# mult $t1, $t2
+# div $t1, $t2
 # li $t1, XX (incluindo na forma de pseudoinstrução)
-# mfhi/mflo $t1 (ok)
+# mfhi/mflo $t1
 # bgez $t1, LABEL
-# clo $t1, $t2 (ok)
-# srav $t1, $t2, $t3 (ok)
+# clo $t1, $t2
+# srav $t1, $t2, $t3
 #
 #------------------------------------------------------------------------------------------------------------------------------------
 #        /*************  Instructions template  **********
@@ -67,8 +67,8 @@ buffer_data_end:  .asciiz "\nEND;"
 buffer_text_end:  .asciiz "\nEND;"
 buffer_data_address:  .space  8
 buffer_text_address:  .space  8
-s_divisor:  .asciiz " : "
-s_finalizador:  .asciiz ";"
+s_espacodoispontosespaco:  .asciiz " : "
+s_quebralinha:  .asciiz "\n"
 
 msgerrodigito: .asciiz "The string does not contain valid digits."
 s_undefined:    .asciiz "instrução não definida"
@@ -201,7 +201,8 @@ hexa: .space 8
 # 
 buffer:   .space  4
 buffer_caracter_decimal: .space 16
-buffer_decimal_salvo: .space 16
+buffer_decimal_salvo: .space 32
+buffer_decimal_data_salvo: .space 32
 s_debug_de_pobre: .asciiz "passei aqui"
 bufferarmazenanibble: .space 32
 .text
@@ -229,8 +230,6 @@ bufferarmazenanibble: .space 32
   syscall            # open a file (file descriptor returned in $v0)
   move $s7, $v0      # save the file descriptor for writing text in $s6
 ################################################################################################################################################
-  move $t8, $zero    # contador endereço
-  addi $t8, $t8, 0x00400000 #contador endereço
 main:
   jal readchar       #le primeiro caracter
   bne $v0, 46, undefined #se o caracter não for um '.' não vai para o switch de instrução
@@ -248,7 +247,8 @@ main:
     beq $v0, 110, i_nor  #se caracter for um 'n' vai para funcao de escrita do nor
     beq $v0, 106, i_j  #se caracter for um 'j' vai para funcao de verificao comecando por 'j'
     beq $v0, 109, i_m  #se caracter for um 'm' vai para funcao de verificao comecando por 'm' 
-    beq $v0, 99, i_clo  
+    beq $v0, 99, i_clo
+    beq $v0, 36, parser    
 #########################################################################
   i_a:
     jal readchar  #le caracter
@@ -298,6 +298,8 @@ main:
       la   $a1, buffer_data_init # address of buffer from which to write
       li   $a2, 81       # hardcoded buffer length (size of buffer_data_init in decimal)
       syscall            # write to file
+      move $t8, $zero    # contador endereço
+      addi $t8, $t8, 0x00400000 #contador endereço
       loopatewordoutext:
       jal readchar #le caracter
       bne $v0, 46, loopatewordoutext #se o caracter não for um '.', le caracter #le .data até achar .word. Se não achar, data = vazia e proximo . é text.
@@ -312,8 +314,35 @@ main:
       bne $v0, 100, undefined #se não for d, instrucao nao definida
       jal readchar #le caracter
       bne $v0, 32, undefined #se não for espaço, instrucao nao definida
-      
-      j parser
+      #j parser
+      loopescreveword:
+      jal escrevearquivodata
+      jal readchar
+      beq $v0, 44, escrevearquivodata
+      bne $v0, 10, loopescreveword
+      j loopatewordoutext 
+##################################################################################################################################################
+escrevearquivodata:
+      addi $sp, $sp, -4
+      sw $ra, 0($sp)
+      jal armazenanibbledata
+      jal espacodoispontosespacodata
+      jal i_vetordecaracteresparadecimal
+      jal converte_pra_decimal
+      move $t0, $0
+      move $t1, $0
+      move $t2, $0
+      move $t3, $0
+      move $t4, $0
+      move $t5, $0
+      move $t6, $0
+      la $t3, buffer_decimal_salvo
+      lw $t2, 1($t3)
+      la $t3, buffer_decimal_data_salvo
+      jal armazenaimediatodata
+      jal quebralinhadata
+      addi $t8, $t8, 4
+      j gobackcaller      
 ##################################################################################################################################################
     i_text:
       #check if .text
@@ -331,6 +360,8 @@ main:
       la   $a1, buffer_text_init # address of buffer from which to write
       li   $a2, 80       # hardcoded buffer length (size of buffer_data_init in decimal)
       syscall            # write to file
+      move $t8, $zero    # contador endereço
+      addi $t8, $t8, 0x00400000 #contador endereço
       beq $v0, 10, parser #se o proximo caracter for 'enter', volta pra função leitura de caracter até achar próxima instrução.
       j parser
 ##################################################################################################################################################
@@ -359,8 +390,13 @@ main:
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
       la $s2, s_zero_0_em_bin
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 ##################################################################################################################################################
+    
     i_add:
       move $t0, $zero #contador de registrador (0 registrador rd)
       jal readchar  #le caracter
@@ -395,7 +431,10 @@ main:
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
       jal armazenanibble
-      j concatenate
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #######################################################################################################################
     i_addu:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -426,7 +465,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate  
+       jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser 
 #########################################################################
     i_addi:
       move $t0, $zero #contador de registrador (0 registrador rd
@@ -455,14 +498,6 @@ main:
       jal converte_pra_decimal
       addi $t8, $t8, 3
       la $s3, buffer_decimal_salvo($t8)
-      li $t0, 0x000000FF
-      and $t9, $s3, $t0
-      li $t0, 0x0000FF00
-      and $s4, $s3, $t0
-      li $t0, 0X00FF0000
-      and $s3, $s3, $t0
-      move $t0, $zero
-      #j concatenateimediato
       j debug_de_pobre
 
 #########################################################################################################################      
@@ -498,7 +533,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 ##################################################################################################################################################
     i_or:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -532,7 +571,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 ##################################################################################################################################################
     i_nor:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -567,8 +610,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate              
-
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 ###################################################################################################################################################
     i_sub:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -602,7 +648,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #########################################################################
     i_subu:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -633,7 +683,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #########################################################################
     i_xor:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -669,7 +723,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #########################################################################
     i_mult:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -697,7 +755,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #########################################################################
     i_div:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -723,7 +785,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate                  
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser                  
 ##################################################################################################################################################
     i_jr:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -739,12 +805,16 @@ main:
       la $s3, s_zero_0_em_bin
       la $s2, s_zero_0_em_bin
       jal pegaregistrador #função que pega registrador
-      j concatenate              
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser                  
 #########################################################################
     i_sll:
       move $t0, $zero #contador de registrador (0 registrador rd)
       jal readchar
-      beq $v0, 116, i_slt #se o proximo caracter for um 't', vai pra slt
+      beq $v0, 116, i_slt #se o proximo caracter não for um 't', vai pra slt
       bne $v0, 108, undefined
       jal readchar
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida
@@ -772,7 +842,11 @@ main:
       jal converte_pra_decimal
       jal pega_valor_shamt
       move $s4, $a1 #coloca shamt em s4
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #########################################################################
     i_srl:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -805,7 +879,11 @@ main:
       jal converte_pra_decimal
       jal pega_valor_shamt
       move $s4, $a1 #coloca shamt em s4
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #########################################################################
     i_slt:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -836,7 +914,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #########################################################################
     i_srav:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -869,7 +951,11 @@ main:
       bne $v0, 36, undefined  #se o proximo caracter não for um '$', instrução não definida
       jal readchar #le caracter
       jal pegaregistrador #função que pega registrador
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #########################################################################
     i_mfhi:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -889,7 +975,11 @@ main:
       jal pegaregistrador #função que pega registrador
       la $s1, s_zero_0_em_bin
       la $s2, s_zero_0_em_bin
-      j concatenate
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser
 #########################################################################
     i_mflo:
       move $t0, $zero #contador de registrador (0 registrador rd)
@@ -907,7 +997,11 @@ main:
       la $s1, s_zero_0_em_bin
       la $s2, s_zero_0_em_bin
       la $t9, s_function_mflo #coloca o function do mflo em s5
-      j concatenate      
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenate
+      jal quebralinha
+      j parser   
 ##########################################################################################      
     pegaregistrador:
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
@@ -1605,6 +1699,7 @@ main:
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       move $t0, $zero  #anda de 4 em 4
+      addi $t0, $t0, 1
       move $t2, $zero  #salva quantos numeros foram lidos
       move $t1, $zero
     vetordecaracteresparadecimalstart:
@@ -1619,6 +1714,7 @@ main:
     beq $v0, 55, digito_7 #se digito 7
     beq $v0, 56, digito_8 #se digito 8
     beq $v0, 57, digito_9 #se digito 9
+    beq $v0, 44, gobackcaller #func que volta pra caler
     beq $v0, 10, gobackcaller #func que volta pra caler
     bge $t1, 64, undefined 
     j undefined
@@ -1828,6 +1924,7 @@ converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de
    li $t3,0
    li $t4,9
    move $t0, $zero
+   addi $t0, $t0, 1
    lw $t1, buffer_caracter_decimal($t0)        #Get first digit of string
    li $a0, 0            #accumulator
    move $a2, $t1         #$a2=$t1 goto checkdigit
@@ -1851,7 +1948,7 @@ buc1:
 salva_valor_decimal:
    
   la $t0, buffer_decimal_salvo
-  sw $a0, ($t0)
+  sw $a0, 1($t0)
   j gobackcaller
 
 checkdigit:
@@ -1865,6 +1962,8 @@ errodigito:
    syscall
 ##################################################################################################################################################      
 concatenate:
+addi $sp, $sp, 4
+sw $ra, 0($sp)     #salva o endereço de $ra em sp
 # Copy first string to result buffer
   la $a0, ($s0)
   la $a1, s_constroi1
@@ -1961,111 +2060,12 @@ finish_concatenate:
   syscall
   nop
   j convertehexa
-#########################################################################
-concatenateimediato:
-move $t0, $zero
-move $t1, $zero
-# Copy first string to result buffer
-  la $a0, ($s0)
-  la $a1, s_constroi1
-  jal strcopierimediato
-  nop
-# Concatenateimediato second string on result buffer
-  la $a0, ($s1)
-  or $a1, $v0, $zero
-  jal strcopierimediato
-  nop
-  j concatenateimediato2
-  nop
-  
 
-
-concatenateimediato2:
-# Copy first string to result buffer
-  la $a0, s_constroi1
-  la $a1, s_constroi2
-  jal strcopierimediato
-  nop
-
-# Concatenateimediato second string on result buffer
-  la $a0, ($s2)
-  or $a1, $v0, $zero
-  jal strcopierimediato
-  nop
-
-concatenateimediato3:
-# Copy first string to result buffer
-  la $a0, s_constroi2
-  la $a1, s_constroi3
-  jal strcopierimediato
-  nop
-
-# Concatenateimediato second string on result buffer
-  la $a0, ($t9)
-  or $a1, $v0, $zero
-  jal strcopierimediato
-  nop
-
-concatenateimediato4:
-# Copy first string to result buffer
-  la $a0, s_constroi3
-  la $a1, s_constroi4
-  jal strcopierimediato
-  nop
-
-# Concatenateimediato second string on result buffer
-  la $a0, ($s4)
-  or $a1, $v0, $zero
-  jal strcopierimediato
-  nop
-
-concatenateimediato5:
-# Copy first string to result buffer
-  la $a0, s_constroi4
-  la $a1, s_converted
-  jal strcopierimediato
-  nop
-
-# Concatenateimediato second string on result buffer
-  
-  la $a0, ($s3)
-  or $a1, $v0, $zero
-  jal strcopierimediato
-  nop
-  j finish_concatenateimediato
-  nop
-
-# String copier function
-strcopierimediato:
-  or $t0, $a0, $zero # Source
-  or $t1, $a1, $zero # Destination
-
-loop_concatenateimediato:
-  lb $t2, 0($t0)
-  beq $t2, $zero, end_concatenateimediato
-  addiu $t0, $t0, 1
-  sb $t2, 0($t1)
-  addiu $t1, $t1, 1
-  b loop_concatenateimediato
-  nop
-
-end_concatenateimediato:
-  or $v0, $t1, $zero # Return last position on result buffer
-  jr $ra
-  nop
-  #printa pra teste
-finish_concatenateimediato:
-  li $v0, 4
-  la $t0, s_converted
-  add $a0, $t0, $zero
-  syscall
-  nop
-  j convertehexa
 #########################################################################
 convertehexa:
   move $t0, $zero
   loop_conversao:
-    beq $t0, 32, end
+    beq $t0, 32, gobackcaller
     lb $t2, s_converted($t0)
     addi $t0, $t0, 1
     lb $t3, s_converted($t0)
@@ -2177,99 +2177,131 @@ convertehexa:
 
 
   caracterzero:
-    li $v0, 4
-    la $a0, s_hex0
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex0# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracterum: 
-    li $v0, 4
-    la $a0, s_hex1
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex1# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracterdois: 
-    li $v0, 4
-    la $a0, s_hex2
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex2# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caractertres: 
-    li $v0, 4
-    la $a0, s_hex3
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex3# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracterquatro:
-    li $v0, 4
-    la $a0, s_hex4
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex4# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caractercinco: 
-    li $v0, 4
-    la $a0, s_hex5
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex5# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracterseis: 
-    li $v0, 4
-    la $a0, s_hex6
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex6# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caractersete: 
-    li $v0, 4
-    la $a0, s_hex7
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex7# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracteroito:
-    li $v0, 4
-    la $a0, s_hex8
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex8# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracternove: 
-    li $v0, 4
-    la $a0, s_hex9
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hex9# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracterdez: 
-    li $v0, 4
-    la $a0, s_hexA
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hexA# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracteronze: 
-    li $v0, 4
-    la $a0, s_hexB
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hexB# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracterdoze:
-    li $v0, 4
-    la $a0, s_hexC
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hexC# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caractertreze: 
-    li $v0, 4
-    la $a0, s_hexD
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hexD# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caractercatorze: 
-    li $v0, 4
-    la $a0, s_hexE
-    syscall
+     li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hexE# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   caracterquinze: 
-    li $v0, 4
-    la $a0, s_hexF
-    syscall
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_hexF# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
     j loop_conversao
 
   undefined_convertion:
@@ -2279,8 +2311,7 @@ convertehexa:
 #########################################################################
  
 armazenanibble:
-addi $sp, $sp, -4  #prepara pilha pra receber 1 item
-sw $ra, 0($sp)     #salva o endereço de $ra em sp
+
 move $t0, $0
 move $t1, $0
 move $t2, $0
@@ -2289,12 +2320,13 @@ move $t4, $0
 move $t5, $0
 move $t6, $0
 
-addi $t6, $t6, 0
+addi $t6, $t6, 1
 sw $t8, bufferarmazenanibble($t6)
 
 la $t3, bufferarmazenanibble
-lw $t2, 0($t3)
-
+lw $t2, 1($t3)
+addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+sw $ra, 0($sp)     #salva o endereço de $ra em sp
 t1_nible:
 
 andi $t1, $t2, 0x0000000f
@@ -2327,7 +2359,7 @@ sb $t1, 15($t3)
 d3_nible:
 
 andi $t1, $t2, 0x00000f00
-srl $t1, $t1, 4
+srl $t1, $t1, 8
 slti $t0, $t1, 10
 bne $t0, 1, cont_3d
 addi $t1, $t1, 0x30
@@ -2342,7 +2374,7 @@ sb $t1, 23($t3)
 d4_nible:
 
 andi $t1, $t2, 0x0000f000
-srl $t1, $t1, 4
+srl $t1, $t1, 12
 slti $t0, $t1, 10
 bne $t0, 1, cont_4d
 addi $t1, $t1, 0x30
@@ -2358,7 +2390,7 @@ sb $t1, 31($t3)
 d5_nible:
 
 andi $t1, $t2, 0x000f0000
-srl $t1, $t1, 4
+srl $t1, $t1, 16
 slti $t0, $t1, 10
 bne $t0, 1, cont_5d
 addi $t1, $t1, 0x30
@@ -2373,7 +2405,7 @@ sb $t1, 39($t3)
 d6_nible:
 
 andi $t1, $t2, 0x00f00000
-srl $t1, $t1, 4
+srl $t1, $t1, 20
 slti $t0, $t1, 10
 bne $t0, 1, cont_6d
 addi $t1, $t1, 0x30
@@ -2388,7 +2420,7 @@ sb $t1, 47($t3)
 d7_nible:
 
 andi $t1, $t2, 0x0f000000
-srl $t1, $t1, 4
+srl $t1, $t1, 24
 slti $t0, $t1, 10
 bne $t0, 1, cont_7d
 addi $t1, $t1, 0x30
@@ -2404,7 +2436,7 @@ sb $t1, 55($t3)
 d8_nible:
 
 andi $t1, $t2, 0xf0000000
-srl $t1, $t1, 4
+srl $t1, $t1, 28
 slti $t0, $t1, 10
 bne $t0, 1, cont_8d
 addi $t1, $t1, 0x30
@@ -2422,28 +2454,28 @@ j escreveendereco
 
 escreveendereco:
 move $t3, $0
-addi $t3, $t3, 7
+addi $t3, $t3, 63
 lb $t0, bufferarmazenanibble($t3)
 jal verificawdigito
-addi $t3, $t3, 8
+addi $t3, $t3, -8
 lb $t0, bufferarmazenanibble($t3)
 jal verificawdigito
-addi $t3, $t3, 8
+addi $t3, $t3, -8
 lb $t0, bufferarmazenanibble($t3)
 jal verificawdigito
-addi $t3, $t3, 8
+addi $t3, $t3, -8
 lb $t0, bufferarmazenanibble($t3)
 jal verificawdigito
-addi $t3, $t3, 8
+addi $t3, $t3, -8
 lb $t0, bufferarmazenanibble($t3)
 jal verificawdigito
-addi $t3, $t3, 8
+addi $t3, $t3, -8
 lb $t0, bufferarmazenanibble($t3)
 jal verificawdigito
-addi $t3, $t3, 8
+addi $t3, $t3, -8
 lb $t0, bufferarmazenanibble($t3)
 jal verificawdigito
-addi $t3, $t3, 8
+addi $t3, $t3, -8
 lb $t0, bufferarmazenanibble($t3)
 jal verificawdigito
 addi $t8, $t8, 4
@@ -2583,8 +2615,582 @@ la   $a1,  s_tohexF# address of buffer from which to write
 li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
 syscall            # write to file
  jr $ra
+############################################################################
+armazenanibbledata:
+
+move $t0, $0
+move $t1, $0
+move $t2, $0
+move $t3, $0
+move $t4, $0
+move $t5, $0
+move $t6, $0
+addi $t6, $t6, 1
+
+sw $t8, bufferarmazenanibble($t6)
+
+la $t3, bufferarmazenanibble
+lw $t2, 1($t3)
+
+addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+sw $ra, 0($sp)     #salva o endereço de $ra em sp
+t1_nibledata:
+
+andi $t1, $t2, 0x0000000f
+slti $t0, $t1, 10
+bne  $t0, 1, cont_1tdata
+addi $t1, $t1, 0x30
+j store_1tdata
+
+cont_1tdata:
+  addi $t1, $t1, 97
+  
+store_1tdata:
+ sb $t1, 7($t3)
+
+d2_nibledata:
+
+andi $t1, $t2, 0x000000f0
+srl $t1, $t1, 4
+slti $t0, $t1, 10
+bne $t0, 1, cont_2ddata
+addi $t1, $t1, 0x30
+j store_2ddata
+
+cont_2ddata: 
+ addi $t1, $t1, 97
+
+store_2ddata:
+sb $t1, 15($t3)
+
+d3_nibledata:
+
+andi $t1, $t2, 0x00000f00
+srl $t1, $t1, 8
+slti $t0, $t1, 10
+bne $t0, 1, cont_3ddata
+addi $t1, $t1, 0x30
+j store_3ddata
+
+cont_3ddata: 
+ addi $t1, $t1, 97
+
+store_3ddata:
+sb $t1, 23($t3)
+
+d4_nibledata:
+
+andi $t1, $t2, 0x0000f000
+srl $t1, $t1, 12
+slti $t0, $t1, 10
+bne $t0, 1, cont_4ddata
+addi $t1, $t1, 0x30
+j store_4ddata
+
+cont_4ddata: 
+ addi $t1, $t1, 97
+
+store_4ddata:
+sb $t1, 31($t3)
 
 
+d5_nibledata:
+
+andi $t1, $t2, 0x000f0000
+srl $t1, $t1, 16
+slti $t0, $t1, 10
+bne $t0, 1, cont_5ddata
+addi $t1, $t1, 0x30
+j store_5ddata
+
+cont_5ddata: 
+ addi $t1, $t1, 97
+
+store_5ddata:
+sb $t1, 39($t3)
+
+d6_nibledata:
+
+andi $t1, $t2, 0x00f00000
+srl $t1, $t1, 20
+slti $t0, $t1, 10
+bne $t0, 1, cont_6ddata
+addi $t1, $t1, 0x30
+j store_6ddata
+
+cont_6ddata: 
+ addi $t1, $t1, 97
+
+store_6ddata:
+sb $t1, 47($t3)
+
+d7_nibledata:
+
+andi $t1, $t2, 0x0f000000
+srl $t1, $t1, 24
+slti $t0, $t1, 10
+bne $t0, 1, cont_7ddata
+addi $t1, $t1, 0x30
+j store_7ddata
+
+cont_7ddata: 
+ addi $t1, $t1, 97
+
+store_7ddata:
+sb $t1, 55($t3)
+
+
+d8_nibledata:
+
+andi $t1, $t2, 0xf0000000
+srl $t1, $t1, 28
+slti $t0, $t1, 10
+bne $t0, 1, cont_8ddata
+addi $t1, $t1, 0x30
+j store_8ddata
+
+cont_8ddata: 
+ addi $t1, $t1, 97
+
+store_8ddata:
+sb $t1, 63($t3)
+
+j escrevenumerodata
+
+#######################################################################################
+
+
+armazenaimediatodata:
+addi $sp, $sp, -4  #prepara pilha pra receber 1 item
+sw $ra, 0($sp)     #salva o endereço de $ra em sp
+t1_nibledataim:
+
+andi $t1, $t2, 0x0000000f
+slti $t0, $t1, 10
+bne  $t0, 1, cont_1tdataim
+addi $t1, $t1, 0x30
+j store_1tdataim
+
+cont_1tdataim:
+  addi $t1, $t1, 97
+  
+store_1tdataim:
+ sb $t1, 7($t3)
+
+d2_nibledataim:
+
+andi $t1, $t2, 0x000000f0
+srl $t1, $t1, 4
+slti $t0, $t1, 10
+bne $t0, 1, cont_2ddataim
+addi $t1, $t1, 0x30
+j store_2ddataim
+
+cont_2ddataim: 
+ addi $t1, $t1, 97
+
+store_2ddataim:
+sb $t1, 15($t3)
+
+d3_nibledataim:
+
+andi $t1, $t2, 0x00000f00
+srl $t1, $t1, 8
+slti $t0, $t1, 10
+bne $t0, 1, cont_3ddataim
+addi $t1, $t1, 0x30
+j store_3ddataim
+
+cont_3ddataim: 
+ addi $t1, $t1, 97
+
+store_3ddataim:
+sb $t1, 23($t3)
+
+d4_nibledataim:
+
+andi $t1, $t2, 0x0000f000
+srl $t1, $t1, 12
+slti $t0, $t1, 10
+bne $t0, 1, cont_4ddataim
+addi $t1, $t1, 0x30
+j store_4ddataim
+
+cont_4ddataim: 
+ addi $t1, $t1, 97
+
+store_4ddataim:
+sb $t1, 31($t3)
+
+
+d5_nibledataim:
+
+andi $t1, $t2, 0x000f0000
+srl $t1, $t1, 16
+slti $t0, $t1, 10
+bne $t0, 1, cont_5ddataim
+addi $t1, $t1, 0x30
+j store_5ddataim
+
+cont_5ddataim: 
+ addi $t1, $t1, 97
+
+store_5ddataim:
+sb $t1, 39($t3)
+
+d6_nibledataim:
+
+andi $t1, $t2, 0x00f00000
+srl $t1, $t1, 20
+slti $t0, $t1, 10
+bne $t0, 1, cont_6ddataim
+addi $t1, $t1, 0x30
+j store_6ddataim
+
+cont_6ddataim: 
+ addi $t1, $t1, 97
+
+store_6ddataim:
+sb $t1, 47($t3)
+
+d7_nibledataim:
+
+andi $t1, $t2, 0x0f000000
+srl $t1, $t1, 24
+slti $t0, $t1, 10
+bne $t0, 1, cont_7ddataim
+addi $t1, $t1, 0x30
+j store_7ddataim
+
+cont_7ddataim: 
+ addi $t1, $t1, 97
+
+store_7ddataim:
+sb $t1, 55($t3)
+
+
+d8_nibledataim:
+
+andi $t1, $t2, 0xf0000000
+srl $t1, $t1, 28
+slti $t0, $t1, 10
+bne $t0, 1, cont_8ddataim
+addi $t1, $t1, 0x30
+j store_8ddataim
+
+cont_8ddataim: 
+ addi $t1, $t1, 97
+
+store_8ddataim:
+sb $t1, 63($t3)
+
+j escrevenumerodataimediato
+
+
+escrevenumerodataimediato:
+
+move $t0, $0
+la $t3, buffer_decimal_salvo
+lw $t2, 1($t3)
+slti $t1, $t2, 16
+bnez $t1, poe4zeros
+slti $t1, $t2, 32
+bnez $t1, poe3zeros
+slti $t1, $t2, 64
+bnez $t1, poe2zeros
+slti $t1, $t2, 128
+bnez $t1, poezero
+j naopoezero
+
+poe4zeros:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+j naopoezero
+
+poe3zeros:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+j naopoezero
+
+poe2zeros:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+j naopoezero
+
+poezero:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+
+naopoezero:
+
+move $t3, $0
+addi $t3, $t3, 63
+lb $t0, buffer_decimal_salvo($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, buffer_decimal_salvo($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, buffer_decimal_salvo($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, buffer_decimal_salvo($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, buffer_decimal_salvo($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, buffer_decimal_salvo($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, buffer_decimal_salvo($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, buffer_decimal_salvo($t3)
+jal verificawdigitodata
+lw $ra, 0($sp)     #le o endereço de $ra em sp
+addi $sp, $sp, 4  #prepara pilha pra receber 1 item
+jr $ra
+#####################################################################
+
+escrevenumerodata:
+
+move $t3, $0
+addi $t3, $t3, 63
+lb $t0, bufferarmazenanibble($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, bufferarmazenanibble($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, bufferarmazenanibble($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, bufferarmazenanibble($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, bufferarmazenanibble($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, bufferarmazenanibble($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, bufferarmazenanibble($t3)
+jal verificawdigitodata
+addi $t3, $t3, -8
+lb $t0, bufferarmazenanibble($t3)
+jal verificawdigitodata
+lw $ra, 0($sp)     #le o endereço de $ra em sp
+addi $sp, $sp, 4  #prepara pilha pra receber 1 item
+jr $ra
+
+
+verificawdigitodata:
+    beq $t0, 0, gobackcaller
+    beq $t0, 48, wdigito_0data #se digito 0
+    beq $t0, 49, wdigito_1data #se digito 1
+    beq $t0, 50, wdigito_2data #se digito 2
+    beq $t0, 51, wdigito_3data #se digito 3  
+    beq $t0, 52, wdigito_4data #se digito 4
+    beq $t0, 53, wdigito_5data #se digito 5
+    beq $t0, 54, wdigito_6data #se digito 6
+    beq $t0, 55, wdigito_7data #se digito 7
+    beq $t0, 56, wdigito_8data #se digito 8
+    beq $t0, 97, wdigito_adata #se digito 9
+    beq $t0, 98, wdigito_bdata #se digito a
+    beq $t0, 99, wdigito_cdata #se digito b
+    beq $t0, 100, wdigito_ddata #se digito c
+    beq $t0, 101, wdigito_edata #se digito d
+    beq $t0, 102, wdigito_fdata #se digito e
+    j undefined
+
+wdigito_0data:
+
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex0# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_1data:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex1# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_2data:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex2# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_3data:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex3# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_4data:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex4# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_5data:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex5# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_6data:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex6# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_7data:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex7# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_8data:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex8# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_9data:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohex9# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_adata:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohexA# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_bdata:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohexB# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_cdata:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohexC# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_ddata:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohexD# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_edata:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohexE# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+jr $ra
+wdigito_fdata:
+li   $v0, 15       # system call for write to file
+move $a0, $s6      # file descriptor for text stored in s6
+la   $a1,  s_tohexF# address of buffer from which to write
+li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+syscall            # write to file
+ jr $ra
+#########################################################################
+quebralinha:
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_quebralinha# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
+    jr $ra
+#########################################################################
+quebralinhadata:
+    li   $v0, 15       # system call for write to file
+    move $a0, $s6      # file descriptor for text stored in s7
+    la   $a1,  s_quebralinha# address of buffer from which to write
+    li   $a2, 1       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file
+    jr $ra    
+#########################################################################
+espacodoispontosespaco:
+    li   $v0, 15       # system call for write to file
+    move $a0, $s7      # file descriptor for text stored in s7
+    la   $a1,  s_espacodoispontosespaco# address of buffer from which to write
+    li   $a2, 3       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file  
+    jr $ra  
+#########################################################################
+espacodoispontosespacodata:
+    li   $v0, 15       # system call for write to file
+    move $a0, $s6      # file descriptor for text stored in s7
+    la   $a1,  s_espacodoispontosespaco# address of buffer from which to write
+    li   $a2, 3       # hardcoded buffer length (size of buffer_data_init in decimal)
+    syscall            # write to file  
+    jr $ra      
 #########################################################################
 readchar:
   li $v0,14 # prepara para ler caracter do arquivo
