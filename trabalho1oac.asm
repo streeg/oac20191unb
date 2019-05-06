@@ -58,9 +58,9 @@
 #https://stackoverflow.com/questions/30770508/how-to-represent-mips-instruction-as-its-hex-representation link para fazer jumps 
 
         .data
-fouttext:   .asciiz "testdataout.mif"      # filename for data output
-foutdata:   .asciiz "testtextout.mif"      # filename for text output
-fin:    .asciiz "testin.asm"
+fouttext:   .asciiz "dataout.mif"      # filename for data output
+foutdata:   .asciiz "textout.mif"      # filename for text output
+fin:    .asciiz "filein.asm"
 buffer_data_init: .asciiz "DEPTH = 16384;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
 buffer_text_init: .asciiz "DEPTH = 4096;\nWIDTH = 32;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n\n"
 buffer_data_end:  .asciiz "\nEND;"
