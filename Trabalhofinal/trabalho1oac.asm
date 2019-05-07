@@ -1725,61 +1725,61 @@ escrevearquivodata:
 
    digito_0:
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_1:
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_2:
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_3:
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_4:
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_5:
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_6:
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_7: 
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_8:
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
   digito_9:
     addi $t1, $v0, -48
-    sb $t1, buffer_caracter_decimal($t0)
+    sw $t1, buffer_caracter_decimal($t0)
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
@@ -1925,14 +1925,14 @@ converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de
    li $t4,9
    move $t0, $zero
    addi $t0, $t0, 1
-   lb $t1, buffer_caracter_decimal($t0)        #Get first digit of string
+   lw $t1, buffer_caracter_decimal($t0)        #Get first digit of string
    li $a0, 0            #accumulator
    move $a2, $t1         #$a2=$t1 goto checkdigit
    jal checkdigit
    add $a0, $a0, $t1      #Accumulates
    addi $t0, $t0, 4      #Advance string pointer 
    addi $t2, $t2, -1
-   lb $t1, buffer_caracter_decimal($t0)        #Get next digit
+   lw $t1, buffer_caracter_decimal($t0)        #Get next digit
 
 buc1:   
    ble $t2, $zero, salva_valor_decimal #if $t1=10(linefeed) then print
@@ -1942,13 +1942,13 @@ buc1:
    add $a0, $t5, $t1      #Accumulates
    addi $t0, $t0, 4      #Advance string pointer
    addi $t2, $t2, -1 
-   lb $t1, buffer_caracter_decimal($t0)        #Get next digit 
+   lw $t1, buffer_caracter_decimal($t0)        #Get next digit 
    b buc1
 
 salva_valor_decimal:
    
   la $t0, buffer_decimal_salvo
-  sb $a0, 1($t0)
+  sw $a0, 1($t0)
   j gobackcaller
 
 checkdigit:
@@ -2321,10 +2321,10 @@ move $t5, $0
 move $t6, $0
 
 addi $t6, $t6, 1
-sb $t8, bufferarmazenanibble($t6)
+sw $t8, bufferarmazenanibble($t6)
 
 la $t3, bufferarmazenanibble
-lb $t2, 1($t3)
+lw $t2, 1($t3)
 addi $sp, $sp, -4  #prepara pilha pra receber 1 item
 sw $ra, 0($sp)     #salva o endereço de $ra em sp
 t1_nible:
@@ -2336,7 +2336,7 @@ addi $t1, $t1, 0x30
 j store_1t
 
 cont_1t:
-  addi $t1, $t1, 97
+  addi $t1, $t1, 87
   
 store_1t:
  sb $t1, 7($t3)
@@ -2351,7 +2351,7 @@ addi $t1, $t1, 0x30
 j store_2d
 
 cont_2d: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_2d:
 sb $t1, 15($t3)
@@ -2366,7 +2366,7 @@ addi $t1, $t1, 0x30
 j store_3d
 
 cont_3d: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_3d:
 sb $t1, 23($t3)
@@ -2381,7 +2381,7 @@ addi $t1, $t1, 0x30
 j store_4d
 
 cont_4d: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_4d:
 sb $t1, 31($t3)
@@ -2397,7 +2397,7 @@ addi $t1, $t1, 0x30
 j store_5d
 
 cont_5d: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_5d:
 sb $t1, 39($t3)
@@ -2412,7 +2412,7 @@ addi $t1, $t1, 0x30
 j store_6d
 
 cont_6d: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_6d:
 sb $t1, 47($t3)
@@ -2427,7 +2427,7 @@ addi $t1, $t1, 0x30
 j store_7d
 
 cont_7d: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_7d:
 sb $t1, 55($t3)
@@ -2443,7 +2443,7 @@ addi $t1, $t1, 0x30
 j store_8d
 
 cont_8d: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_8d:
 sb $t1, 63($t3)
@@ -2494,12 +2494,13 @@ verificawdigito:
     beq $t0, 54, wdigito_6 #se digito 6
     beq $t0, 55, wdigito_7 #se digito 7
     beq $t0, 56, wdigito_8 #se digito 8
-    beq $t0, 97, wdigito_a #se digito 9
-    beq $t0, 98, wdigito_b #se digito a
-    beq $t0, 99, wdigito_c #se digito b
-    beq $t0, 100, wdigito_d #se digito c
-    beq $t0, 101, wdigito_e #se digito d
-    beq $t0, 102, wdigito_f #se digito e
+    beq $t0, 57, wdigito_9 #se digito 9
+    beq $t0, 97, wdigito_a #se digito a
+    beq $t0, 98, wdigito_b #se digito b
+    beq $t0, 99, wdigito_c #se digito c
+    beq $t0, 100, wdigito_d #se digito d
+    beq $t0, 101, wdigito_e #se digito e
+    beq $t0, 102, wdigito_f #se digito f
     j undefined
 
 wdigito_0:
@@ -2643,7 +2644,7 @@ addi $t1, $t1, 0x30
 j store_1tdata
 
 cont_1tdata:
-  addi $t1, $t1, 97
+  addi $t1, $t1, 87
   
 store_1tdata:
  sb $t1, 7($t3)
@@ -2658,7 +2659,7 @@ addi $t1, $t1, 0x30
 j store_2ddata
 
 cont_2ddata: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_2ddata:
 sb $t1, 15($t3)
@@ -2673,7 +2674,7 @@ addi $t1, $t1, 0x30
 j store_3ddata
 
 cont_3ddata: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_3ddata:
 sb $t1, 23($t3)
@@ -2688,7 +2689,7 @@ addi $t1, $t1, 0x30
 j store_4ddata
 
 cont_4ddata: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_4ddata:
 sb $t1, 31($t3)
@@ -2704,7 +2705,7 @@ addi $t1, $t1, 0x30
 j store_5ddata
 
 cont_5ddata: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_5ddata:
 sb $t1, 39($t3)
@@ -2719,7 +2720,7 @@ addi $t1, $t1, 0x30
 j store_6ddata
 
 cont_6ddata: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_6ddata:
 sb $t1, 47($t3)
@@ -2734,7 +2735,7 @@ addi $t1, $t1, 0x30
 j store_7ddata
 
 cont_7ddata: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_7ddata:
 sb $t1, 55($t3)
@@ -2750,7 +2751,7 @@ addi $t1, $t1, 0x30
 j store_8ddata
 
 cont_8ddata: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_8ddata:
 sb $t1, 63($t3)
@@ -2772,7 +2773,7 @@ addi $t1, $t1, 0x30
 j store_1tdataim
 
 cont_1tdataim:
-  addi $t1, $t1, 97
+  addi $t1, $t1, 87
   
 store_1tdataim:
  sb $t1, 7($t3)
@@ -2787,7 +2788,7 @@ addi $t1, $t1, 0x30
 j store_2ddataim
 
 cont_2ddataim: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_2ddataim:
 sb $t1, 15($t3)
@@ -2802,7 +2803,7 @@ addi $t1, $t1, 0x30
 j store_3ddataim
 
 cont_3ddataim: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_3ddataim:
 sb $t1, 23($t3)
@@ -2817,7 +2818,7 @@ addi $t1, $t1, 0x30
 j store_4ddataim
 
 cont_4ddataim: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_4ddataim:
 sb $t1, 31($t3)
@@ -2833,7 +2834,7 @@ addi $t1, $t1, 0x30
 j store_5ddataim
 
 cont_5ddataim: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_5ddataim:
 sb $t1, 39($t3)
@@ -2848,7 +2849,7 @@ addi $t1, $t1, 0x30
 j store_6ddataim
 
 cont_6ddataim: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_6ddataim:
 sb $t1, 47($t3)
@@ -2863,7 +2864,7 @@ addi $t1, $t1, 0x30
 j store_7ddataim
 
 cont_7ddataim: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_7ddataim:
 sb $t1, 55($t3)
@@ -2879,7 +2880,7 @@ addi $t1, $t1, 0x30
 j store_8ddataim
 
 cont_8ddataim: 
- addi $t1, $t1, 97
+ addi $t1, $t1, 87
 
 store_8ddataim:
 sb $t1, 63($t3)
@@ -2892,13 +2893,13 @@ escrevenumerodataimediato:
 move $t0, $0
 la $t3, buffer_decimal_salvo
 lw $t2, 1($t3)
-slti $t1, $t2, 16
-bnez $t1, poe4zeros
 slti $t1, $t2, 32
-bnez $t1, poe3zeros
+bnez $t1, poe4zeros
 slti $t1, $t2, 64
-bnez $t1, poe2zeros
+bnez $t1, poe3zeros
 slti $t1, $t2, 128
+bnez $t1, poe2zeros
+slti $t1, $t2, 256
 bnez $t1, poezero
 j naopoezero
 
@@ -3038,12 +3039,13 @@ verificawdigitodata:
     beq $t0, 54, wdigito_6data #se digito 6
     beq $t0, 55, wdigito_7data #se digito 7
     beq $t0, 56, wdigito_8data #se digito 8
-    beq $t0, 97, wdigito_adata #se digito 9
-    beq $t0, 98, wdigito_bdata #se digito a
-    beq $t0, 99, wdigito_cdata #se digito b
-    beq $t0, 100, wdigito_ddata #se digito c
-    beq $t0, 101, wdigito_edata #se digito d
-    beq $t0, 102, wdigito_fdata #se digito e
+    beq $t0, 57, wdigito_9data #se digito 9
+    beq $t0, 97, wdigito_adata #se digito a
+    beq $t0, 98, wdigito_bdata #se digito b
+    beq $t0, 99, wdigito_cdata #se digito c
+    beq $t0, 100, wdigito_ddata #se digito d
+    beq $t0, 101, wdigito_edata #se digito e
+    beq $t0, 102, wdigito_fdata #se digito f
     j undefined
 
 wdigito_0data:
