@@ -57,7 +57,8 @@
 #
 #https://stackoverflow.com/questions/30770508/how-to-represent-mips-instruction-as-its-hex-representation link para fazer jumps 
 
-        .data
+.data
+
 fouttext:   .asciiz "dataout.mif"      # filename for data output
 foutdata:   .asciiz "textout.mif"      # filename for text output
 fin:    .asciiz "filein.asm"
@@ -337,7 +338,7 @@ escrevearquivodata:
       move $t5, $0
       move $t6, $0
       la $t3, buffer_decimal_salvo
-      lw $t2, 1($t3)
+      lw $t2, 2($t3)
       la $t3, buffer_decimal_data_salvo
       jal armazenaimediatodata
       jal quebralinhadata
@@ -1699,7 +1700,7 @@ escrevearquivodata:
       addi $sp, $sp, -4  #prepara pilha pra receber 1 item
       sw $ra, 0($sp)     #salva o endereço de $ra em sp
       move $t0, $zero  #anda de 4 em 4
-      addi $t0, $t0, 1
+      addi $t0, $t0, 2
       move $t2, $zero  #salva quantos numeros foram lidos
       move $t1, $zero
     vetordecaracteresparadecimalstart:
@@ -1716,8 +1717,18 @@ escrevearquivodata:
     beq $v0, 57, digito_9 #se digito 9
     beq $v0, 44, gobackcaller #func que volta pra caler
     beq $v0, 10, gobackcaller #func que volta pra caler
+    beq $v0, 58, pulaDoisPontosEWord #func que volta pra caler
     bge $t1, 64, undefined 
     j undefined
+    pulaDoisPontosEWord:
+       jal readchar
+       jal readchar
+       jal readchar
+       jal readchar
+       jal readchar
+       jal readchar
+       jal readchar
+       j vetordecaracteresparadecimalstart
   gobackcaller:
           lw $ra, 0($sp)     #salva o endereço de $ra em sp
           addi $sp, $sp, 4  #prepara pilha pra receber 1 item
@@ -1924,7 +1935,7 @@ converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de
    li $t3,0
    li $t4,9
    move $t0, $zero
-   addi $t0, $t0, 1
+   addi $t0, $t0, 2
    lw $t1, buffer_caracter_decimal($t0)        #Get first digit of string
    li $a0, 0            #accumulator
    move $a2, $t1         #$a2=$t1 goto checkdigit
@@ -1948,7 +1959,7 @@ buc1:
 salva_valor_decimal:
    
   la $t0, buffer_decimal_salvo
-  sw $a0, 1($t0)
+  sw $a0, 2($t0)
   j gobackcaller
 
 checkdigit:
@@ -2320,11 +2331,11 @@ move $t4, $0
 move $t5, $0
 move $t6, $0
 
-addi $t6, $t6, 1
+addi $t6, $t6, 2
 sw $t8, bufferarmazenanibble($t6)
 
 la $t3, bufferarmazenanibble
-lw $t2, 1($t3)
+lw $t2, 2($t3)
 addi $sp, $sp, -4  #prepara pilha pra receber 1 item
 sw $ra, 0($sp)     #salva o endereço de $ra em sp
 t1_nible:
@@ -2626,12 +2637,12 @@ move $t3, $0
 move $t4, $0
 move $t5, $0
 move $t6, $0
-addi $t6, $t6, 1
+addi $t6, $t6, 2
 
 sw $t8, bufferarmazenanibble($t6)
 
 la $t3, bufferarmazenanibble
-lw $t2, 1($t3)
+lw $t2, 2($t3)
 
 addi $sp, $sp, -4  #prepara pilha pra receber 1 item
 sw $ra, 0($sp)     #salva o endereço de $ra em sp
@@ -2892,7 +2903,7 @@ escrevenumerodataimediato:
 
 move $t0, $0
 la $t3, buffer_decimal_salvo
-lw $t2, 1($t3)
+lw $t2, 2($t3)
 slti $t1, $t2, 32
 bnez $t1, poe4zeros
 slti $t1, $t2, 64
