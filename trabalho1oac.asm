@@ -206,6 +206,7 @@ buffer_decimal_salvo: .space 32
 buffer_decimal_data_salvo: .space 32
 s_debug_de_pobre: .asciiz "passei aqui"
 bufferarmazenanibble: .space 32
+array: .space 32
 .text
 
 
@@ -396,8 +397,7 @@ escrevearquivodata:
       jal concatenate
       jal quebralinha
       j parser
-##################################################################################################################################################
-    
+################################################################################################################################################## 
     i_add:
       move $t0, $zero #contador de registrador (0 registrador rd)
       jal readchar  #le caracter
@@ -497,9 +497,13 @@ escrevearquivodata:
       bne $v0, 32, undefined #se o proximo caracter não for um 'espaço', instrução não definida.
       jal i_vetordecaracteresparadecimal
       jal converte_pra_decimal
-      addi $t8, $t8, 3
-      la $s3, buffer_decimal_salvo($t8)
-      j debug_de_pobre
+      jal converte_decimal_pra_binario
+      la $s4, array
+      jal armazenanibble
+      jal espacodoispontosespaco
+      jal concatenateimediato
+      jal quebralinha
+      j parser
 
 #########################################################################################################################      
     i_and:
@@ -1794,7 +1798,7 @@ escrevearquivodata:
     addi $t0, $t0, 4
     addi $t2, $t2, 1
     j vetordecaracteresparadecimalstart
-    
+##################################################################################################################################################   
 pega_valor_shamt:
    beq $a0, 0, preenche_shamt_0
    beq $a0, 1, preenche_shamt_1
@@ -1828,7 +1832,7 @@ pega_valor_shamt:
    beq $a0, 29, preenche_shamt_29
    beq $a0, 30, preenche_shamt_30
    beq $a0, 31, preenche_shamt_31
-   
+##################################################################################################################################################  
 preenche_shamt_0:
    la $a1, s_zero_0_em_bin
    jr $ra
@@ -1925,7 +1929,95 @@ preenche_shamt_30:
 preenche_shamt_31:
    la $a1, s_ra_31_em_bin
    jr $ra
-   
+concatenateimediato:
+addi $sp, $sp, 4
+sw $ra, 0($sp)     #salva o endere�o de $ra em sp
+# Copy first string to result buffer
+  la $a0, ($s0) #aqui vai o opcode
+  la $a1, s_constroi1
+  jal strcopierimediato
+  nop
+
+# Concatenate second string on result buffer
+  la $a0, ($s1) #aqui vai o rt
+  or $a1, $v0, $zero
+  jal strcopierimediato
+  nop
+  j concatenate2imediato
+  nop
+
+
+
+concatenate2imediato:
+# Copy first string to result buffer
+  la $a0, s_constroi1
+  la $a1, s_constroi2
+  jal strcopierimediato
+  nop
+
+# Concatenate second string on result buffer
+  la $a0, ($s2) #aqui vai o rd
+  or $a1, $v0, $zero
+  jal strcopierimediato
+  nop
+
+concatenate3imediato:
+# Copy first string to result buffer
+  la $a0, s_constroi2
+  la $a1, s_converted
+  jal strcopierimediato
+  nop
+
+# Concatenate second string on result buffer 
+  la $a0, ($s4)   #aqui vai o inicio do vetor que vc criou ai 
+  or $a1, $v0, $zero
+  jal strcopierimediatosw
+  nop
+  j finish_concatenateimediato
+  nop
+
+# String copier function
+strcopierimediatosw:
+  or $t0, $a0, $zero # Source
+  or $t1, $a1, $zero # Destination
+    addi $t0, $t0, 2
+  addi $t1, $t1, 2
+
+loop_concatenateimediatosw:
+  lw $t2, 0($t0)
+  beq $t2, $zero, end_concatenateimediato
+  addiu $t0, $t0, 4
+  sw $t2, 0($t1)
+  addiu $t1, $t1, 4
+  b loop_concatenateimediatosw
+  nop
+
+# String copier function
+strcopierimediato:
+  or $t0, $a0, $zero # Source
+  or $t1, $a1, $zero # Destination
+
+loop_concatenateimediato:
+  lb $t2, 0($t0)
+  beq $t2, $zero, end_concatenateimediato
+  addiu $t0, $t0, 1
+  sb $t2, 0($t1)
+  addiu $t1, $t1, 1
+  b loop_concatenateimediato
+  nop
+
+end_concatenateimediato:
+  or $v0, $t1, $zero # Return last position on result buffer
+  jr $ra
+  nop
+  #printa pra teste
+finish_concatenateimediato:
+  li $v0, 4
+  la $t0, s_converted
+  add $a0, $t0, $zero
+  syscall
+  nop
+  j convertehexa
 
 converte_pra_decimal: #tem que converter pra hexa. tem que adicionar criterio de parada. resultado armazenado em a0.
   #t2 tem contador de numeros em buffer
@@ -1966,7 +2058,44 @@ checkdigit:
    blt $a2, $t3, errodigito  
    bgt $a2, $t4, errodigito
    jr $ra
+converte_decimal_pra_binario: #decimal ja esta em $a0
+add  $t0, $zero, $a0
+add  $t1, $zero, $zero	# Zero out $t1
+addi $t3, $zero, 1	# load 1 as a mask
+sll $t3, $t3, 15	# move the mask to appropriate position
+addi $t4, $zero, 16	# loop counter
+addi $t6, $t6, 2
+loop:
 
+and $t1, $t0, $t3	# and the input with the mask
+beq $t1, $zero, verifyzero	# Branch to print if its 0
+
+add $t1, $zero, $zero	# Zero out $t1
+addi $t1, $zero, '1'	# Put a 1 in $t1
+j store
+
+
+verifyzero:
+beq $t1, $zero, valuezero
+store:
+srl $t3, $t3, 1
+addi $t4, $t4, -1
+sw $t1, array($t6)
+addi $t6, $t6, 4
+bne  $t4, $zero, loop
+move $t6, $zero
+#addi $t6, $t6, 2
+j print
+valuezero:
+addi $t1, $t1, '0'
+j store
+print:
+#li $v0, 1
+#lw $a0, array($t6)
+#syscall
+#addi $t6, $t6, 4
+#bne $t6, 66, print
+jr $ra
 errodigito:
    la $a0, msgerrodigito
    li $v0, 4            #print eror
